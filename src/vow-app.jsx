@@ -423,20 +423,22 @@ function generateCode() {
 
 // ─── Auth Screen ──────────────────────────────────────────────────────────────
 function AuthScreen({ onAuth }) {
+  const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = async () => {
     if (!email.includes("@")) { setError("Enter a valid email address."); return; }
+    if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
     setLoading(true); setError("");
-    const { error: err } = await supabase.auth.signInWithOtp({
-      email, options: { emailRedirectTo: window.location.origin }
-    });
+    const { error: err } = mode === "signup"
+      ? await supabase.auth.signUp({ email, password })
+      : await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (err) { setError(err.message); return; }
-    setSent(true);
+    onAuth();
   };
 
   return (
@@ -456,51 +458,51 @@ function AuthScreen({ onAuth }) {
         <p style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:18, fontStyle:"italic",
           color:C.gold, marginTop:10 }}>The things your wedding planner won't tell you.</p>
 
-        {!sent ? (
-          <div style={{ marginTop:40 }}>
-            <p style={{ fontSize:13, color:`${C.cream}66`, marginBottom:20, fontWeight:300 }}>
-              Enter your email to get started. We'll send a magic link — no password needed.
-            </p>
-            <input value={email} onChange={e=>setEmail(e.target.value)}
-              onKeyDown={e=>e.key==="Enter"&&handleSubmit()}
-              placeholder="your@email.com"
-              type="email"
-              style={{ width:"100%", padding:"14px 20px", borderRadius:100,
-                background:C.navyMid, border:`1px solid ${error ? "#F04C8C66" : C.creamFaint}`,
-                color:C.cream, fontSize:15, fontFamily:"'DM Sans',sans-serif",
-                outline:"none", textAlign:"center", marginBottom:10 }} />
-            {error && <p style={{ fontSize:12, color:"#F04C8C", marginBottom:10 }}>{error}</p>}
-            <button onClick={handleSubmit} disabled={loading}
-              style={{ width:"100%", padding:"15px", borderRadius:100, background:C.gold,
-                color:C.navy, border:"none", fontSize:15, fontWeight:500, cursor:"pointer",
-                fontFamily:"'DM Sans',sans-serif", display:"flex", alignItems:"center",
-                justifyContent:"center", gap:10, boxShadow:`0 8px 28px ${C.gold}44` }}>
-              {loading ? <Spinner /> : "Send Magic Link →"}
+        <div style={{ display:"flex", gap:8, marginTop:36, marginBottom:24,
+          background:C.creamFaint, borderRadius:100, padding:4 }}>
+          {["login","signup"].map(m=>(
+            <button key={m} onClick={()=>{ setMode(m); setError(""); }}
+              style={{ flex:1, padding:"10px", borderRadius:100, border:"none", cursor:"pointer",
+                background: mode===m ? C.gold : "transparent",
+                color: mode===m ? C.navy : `${C.cream}66`,
+                fontSize:13, fontWeight:500, fontFamily:"'DM Sans',sans-serif", transition:"all .2s" }}>
+              {m==="login" ? "Sign in" : "Create account"}
             </button>
-            <p style={{ fontSize:11, color:`${C.cream}33`, marginTop:16 }}>
-              Free to start · Your data syncs across devices
-            </p>
-          </div>
-        ) : (
-          <div style={{ marginTop:40, animation:"pop .5s ease forwards" }}>
-            <div style={{ fontSize:48, marginBottom:16 }}>📬</div>
-            <h3 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:28, fontWeight:300, color:C.cream }}>Check your inbox</h3>
-            <p style={{ fontSize:14, color:`${C.cream}66`, marginTop:12, lineHeight:1.7, fontWeight:300 }}>
-              We sent a magic link to <strong style={{ color:C.cream }}>{email}</strong>.
-              Click it to sign in — no password needed.
-            </p>
-            <button onClick={()=>setSent(false)}
-              style={{ marginTop:24, padding:"10px 24px", borderRadius:100, background:"transparent",
-                border:`1px solid ${C.creamFaint}`, color:`${C.cream}55`, fontSize:13,
-                cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}>
-              Use a different email
-            </button>
-          </div>
-        )}
+          ))}
+        </div>
+
+        <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+          <input value={email} onChange={e=>setEmail(e.target.value)}
+            onKeyDown={e=>e.key==="Enter"&&handleSubmit()}
+            placeholder="your@email.com" type="email"
+            style={{ width:"100%", padding:"14px 20px", borderRadius:100,
+              background:C.navyMid, border:`1px solid ${C.creamFaint}`,
+              color:C.cream, fontSize:14, fontFamily:"'DM Sans',sans-serif",
+              outline:"none", textAlign:"center" }} />
+          <input value={password} onChange={e=>setPassword(e.target.value)}
+            onKeyDown={e=>e.key==="Enter"&&handleSubmit()}
+            placeholder="Password (min 6 characters)" type="password"
+            style={{ width:"100%", padding:"14px 20px", borderRadius:100,
+              background:C.navyMid, border:`1px solid ${error ? "#F04C8C66" : C.creamFaint}`,
+              color:C.cream, fontSize:14, fontFamily:"'DM Sans',sans-serif",
+              outline:"none", textAlign:"center" }} />
+          {error && <p style={{ fontSize:12, color:"#F04C8C" }}>{error}</p>}
+          <button onClick={handleSubmit} disabled={loading}
+            style={{ width:"100%", padding:"15px", borderRadius:100, background:C.gold,
+              color:C.navy, border:"none", fontSize:15, fontWeight:500, cursor:"pointer",
+              fontFamily:"'DM Sans',sans-serif", display:"flex", alignItems:"center",
+              justifyContent:"center", gap:10, boxShadow:`0 8px 28px ${C.gold}44`, marginTop:4 }}>
+            {loading ? <Spinner /> : mode==="login" ? "Sign in →" : "Create account →"}
+          </button>
+        </div>
+        <p style={{ fontSize:11, color:`${C.cream}33`, marginTop:16 }}>
+          Free · Your progress syncs across devices
+        </p>
       </div>
     </div>
   );
 }
+
 
 // ─── Onboarding ───────────────────────────────────────────────────────────────
 function Onboarding({ onComplete }) {
