@@ -1199,14 +1199,45 @@ export default function VowApp() {
       supabase.from("profiles").select("*").eq("id", uid).single(),
       supabase.from("progress").select("*").eq("id", uid).single(),
     ]);
-    if (prof) { setProfile(prof); setScreen("map"); }
-    else setScreen("onboarding");
+    if (prof) {
+      // Map snake_case DB columns back to camelCase
+      const normalized = { ...prof, partnerIncome: prof.partner_income || prof.partnerIncome };
+      setProfile(normalized);
+      localStorage.setItem("vow_profile", JSON.stringify(normalized));
+      setScreen("map");
+    } else {
+      // Check localStorage fallback in case Supabase save failed
+      try {
+        const cached = localStorage.getItem("vow_profile");
+        if (cached) {
+          const p = JSON.parse(cached);
+          setProfile(p);
+          // Re-save to Supabase now that we have a session
+          await supabase.from("profiles").upsert({ id: uid, stage: p.stage, income: p.income, partner_income: p.partnerIncome, children: p.children, debt: p.debt, home: p.home });
+          await supabase.from("progress").upsert({ id: uid, completed_chapters: [] });
+          setScreen("map");
+        } else {
+          setScreen("onboarding");
+        }
+      } catch { setScreen("onboarding"); }
+    }
     if (prog) setCompleted(prog.completed_chapters || []);
   };
 
   const handleProfileComplete = async (answers) => {
     setProfile(answers);
-    await supabase.from("profiles").upsert({ id: user.id, ...answers });
+    localStorage.setItem("vow_profile", JSON.stringify(answers));
+    // Map camelCase to snake_case for Supabase columns
+    const { error } = await supabase.from("profiles").upsert({
+      id: user.id,
+      stage: answers.stage,
+      income: answers.income,
+      partner_income: answers.partnerIncome,
+      children: answers.children,
+      debt: answers.debt,
+      home: answers.home,
+    });
+    if (error) console.error("Profile save error:", error);
     await supabase.from("progress").upsert({ id: user.id, completed_chapters: [] });
     setScreen("map");
   };
@@ -1223,6 +1254,7 @@ export default function VowApp() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     localStorage.removeItem("vow_onboarding");
+    localStorage.removeItem("vow_profile");
     setUser(null); setProfile(null); setCompleted([]);
     setScreen("auth");
   };
