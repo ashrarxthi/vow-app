@@ -599,8 +599,10 @@ function AuthScreen({ onAuth }) {
 
 // ─── Onboarding ───────────────────────────────────────────────────────────────
 function Onboarding({ onComplete }) {
-  const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState({});
+  const savedAnswers = (() => { try { return JSON.parse(localStorage.getItem("vow_onboarding") || "{}"); } catch { return {}; } })();
+  const savedStep = Object.keys(savedAnswers).length;
+  const [step, setStep] = useState(Math.min(savedStep, PROFILE_QUESTIONS.length - 1));
+  const [answers, setAnswers] = useState(savedAnswers);
   const [selected, setSelected] = useState(null);
   const q = PROFILE_QUESTIONS[step];
 
@@ -609,9 +611,10 @@ function Onboarding({ onComplete }) {
     setTimeout(() => {
       const next = { ...answers, [q.id]: val };
       setAnswers(next);
+      localStorage.setItem("vow_onboarding", JSON.stringify(next));
       setSelected(null);
       if (step < PROFILE_QUESTIONS.length - 1) setStep(s=>s+1);
-      else onComplete(next);
+      else { localStorage.removeItem("vow_onboarding"); onComplete(next); }
     }, 280);
   };
 
@@ -1219,6 +1222,7 @@ export default function VowApp() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    localStorage.removeItem("vow_onboarding");
     setUser(null); setProfile(null); setCompleted([]);
     setScreen("auth");
   };
