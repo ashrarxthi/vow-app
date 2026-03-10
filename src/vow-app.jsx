@@ -1092,6 +1092,8 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, o
         </div>
       </div>
     </div>
+  );
+}
 
 // ─── Lesson Screen ────────────────────────────────────────────────────────────
 function LessonScreen({ chapter, profile, onComplete, onBack }) {
