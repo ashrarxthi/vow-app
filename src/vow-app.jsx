@@ -783,14 +783,88 @@ function PartnerModal({ userId, onClose }) {
   );
 }
 
+// ─── Profile Edit Modal ──────────────────────────────────────────────────────
+function ProfileModal({ profile, userId, onSave, onClose }) {
+  const [answers, setAnswers] = useState({ ...profile });
+  const [step, setStep] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const q = PROFILE_QUESTIONS[step];
+  const isLast = step === PROFILE_QUESTIONS.length - 1;
+
+  const pick = async (val) => {
+    const next = { ...answers, [q.id]: val };
+    setAnswers(next);
+    if (!isLast) { setStep(s => s + 1); return; }
+    setSaving(true);
+    await supabase.from("profiles").upsert({
+      id: userId, stage: next.stage, income: next.income,
+      partner_income: next.partnerIncome, children: next.children,
+      debt: next.debt, home: next.home,
+    });
+    localStorage.setItem("vow_profile", JSON.stringify(next));
+    setSaving(false);
+    onSave(next);
+  };
+
+  return (
+    <div style={{ position:"fixed", inset:0, background:"rgba(13,24,36,.92)", backdropFilter:"blur(10px)",
+      display:"flex", alignItems:"center", justifyContent:"center", padding:20, zIndex:200 }}>
+      <div style={{ background:C.navyLight, borderRadius:24, padding:"28px 24px", maxWidth:440,
+        width:"100%", border:`1px solid ${C.creamFaint}`, animation:"pop .3s ease forwards",
+        maxHeight:"90vh", overflowY:"auto" }}>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
+          <div style={{ fontSize:13, color:`${C.cream}55` }}>Edit your profile · {step+1}/{PROFILE_QUESTIONS.length}</div>
+          <button onClick={onClose} style={{ background:"none", border:"none",
+            color:`${C.cream}44`, cursor:"pointer", fontSize:22, lineHeight:1 }}>×</button>
+        </div>
+        <div style={{ display:"flex", gap:4, marginBottom:24 }}>
+          {PROFILE_QUESTIONS.map((_,i) => (
+            <div key={i} onClick={() => setStep(i)} style={{ flex:1, height:3, borderRadius:2,
+              background: i<=step ? C.gold : `${C.cream}15`, cursor:"pointer", transition:"background .2s" }} />
+          ))}
+        </div>
+        <div style={{ fontSize:28, marginBottom:12 }}>{q.emoji}</div>
+        <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:26, fontWeight:300,
+          color:C.cream, lineHeight:1.3, marginBottom:20 }}>{q.question}</div>
+        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+          {q.options.map(opt => {
+            const selected = answers[q.id] === opt.value;
+            return (
+              <button key={opt.value} onClick={() => pick(opt.value)}
+                style={{ padding:"14px 18px", borderRadius:12, cursor:"pointer", textAlign:"left",
+                  border:`1px solid ${selected ? C.gold+"88" : C.creamFaint}`,
+                  background: selected ? `${C.gold}22` : C.creamFaint,
+                  color:C.cream, fontSize:14, fontFamily:"'DM Sans',sans-serif",
+                  fontWeight: selected ? 500 : 400, transition:"all .15s",
+                  display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                {opt.label}
+                {selected && <span style={{ color:C.gold, fontSize:14 }}>✓</span>}
+              </button>
+            );
+          })}
+        </div>
+        {isLast && (
+          <button onClick={() => { onSave(answers); onClose(); }} disabled={saving}
+            style={{ width:"100%", marginTop:16, padding:"14px", borderRadius:100,
+              background:C.gold, color:C.navy, border:"none", fontSize:14, fontWeight:500,
+              cursor:"pointer", fontFamily:"'DM Sans',sans-serif",
+              display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+            {saving ? "Saving..." : "Save changes ✓"}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Chapter Map ──────────────────────────────────────────────────────────────
-function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, onSignOut }) {
+function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, onSignOut, onProfileUpdate }) {
   const [showPartner, setShowPartner] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [partnerProgress, setPartnerProgress] = useState(null);
   const pct = Math.round((completed.length / CHAPTERS.length) * 100);
 
   useEffect(()=>{
-    // Check if linked to a partner and fetch their progress
     (async()=>{
       const { data: link } = await supabase.from("partner_links")
         .select("created_by, partner_id")
@@ -805,121 +879,219 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, o
     })();
   }, [userId]);
 
-  // Check URL for partner code on load
   useEffect(()=>{
     const params = new URLSearchParams(window.location.search);
-    const code = params.get("partner");
-    if (code) setShowPartner(true);
+    if (params.get("partner")) setShowPartner(true);
   }, []);
 
+  const stageLabel = {
+    engaged:"💍 Engaged", planning:"💫 Planning to propose",
+    married:"🥂 Newly married", curious:"👀 Just exploring"
+  }[profile?.stage] || "Your profile";
+
   return (
-    <div style={{ minHeight:"100vh", background:`linear-gradient(160deg, ${C.navyLight} 0%, ${C.navy} 100%)`, padding:"44px 20px 100px" }}>
+    <div style={{ minHeight:"100vh", background:`linear-gradient(170deg, #0D1F2D 0%, #0D1824 60%)`, paddingBottom:80 }}>
       {showPartner && <PartnerModal userId={userId} onClose={()=>setShowPartner(false)} />}
-      <div style={{ maxWidth:460, margin:"0 auto" }}>
-        {/* Header */}
-        <div style={{ display:"flex", alignItems:"center", gap:12, animation:"fadeUp .6s ease forwards" }}>
-          <VAvatar size={42} />
-          <div style={{ flex:1 }}>
-            <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:28, fontWeight:300, color:C.cream }}>Your Vow Journey</div>
-            <div style={{ fontSize:12, color:`${C.cream}44`, marginTop:2 }}>
-              {completed.length}/{CHAPTERS.length} complete
-              {partnerProgress && <span style={{ color:`${C.gold}88` }}> · Partner synced ✓</span>}
+      {showProfile && <ProfileModal profile={profile} userId={userId}
+        onSave={(p)=>{ onProfileUpdate(p); setShowProfile(false); }}
+        onClose={()=>setShowProfile(false)} />}
+
+      {/* Hero header */}
+      <div style={{ padding:"0 20px", paddingTop:48, paddingBottom:32,
+        background:"linear-gradient(180deg, #0F2235 0%, transparent 100%)",
+        borderBottom:`1px solid ${C.creamFaint}` }}>
+        <div style={{ maxWidth:460, margin:"0 auto" }}>
+          <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:20 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+              <VAvatar size={44} pulse={pct < 100} />
+              <div>
+                <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:32,
+                  fontWeight:300, color:C.cream, lineHeight:1 }}>Vow</div>
+                <div style={{ fontSize:11, color:C.gold, marginTop:3, letterSpacing:".5px" }}>{stageLabel}</div>
+              </div>
+            </div>
+            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+              <button onClick={()=>setShowProfile(true)}
+                style={{ width:36, height:36, borderRadius:"50%", background:C.creamFaint,
+                  border:`1px solid ${C.creamFaint}`, cursor:"pointer", fontSize:16,
+                  display:"flex", alignItems:"center", justifyContent:"center", transition:"all .2s" }}
+                title="Edit profile"
+                onMouseEnter={e=>{e.currentTarget.style.borderColor=`${C.gold}66`; e.currentTarget.style.background=`${C.gold}18`;}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor=C.creamFaint; e.currentTarget.style.background=C.creamFaint;}}>
+                👤
+              </button>
+              <button onClick={onSignOut}
+                style={{ width:36, height:36, borderRadius:"50%", background:C.creamFaint,
+                  border:`1px solid ${C.creamFaint}`, cursor:"pointer", fontSize:14,
+                  display:"flex", alignItems:"center", justifyContent:"center", color:`${C.cream}55`,
+                  fontFamily:"'DM Sans',sans-serif", transition:"all .2s" }}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor=`${C.cream}22`;}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor=C.creamFaint;}}>
+                ↩
+              </button>
             </div>
           </div>
-          <button onClick={onSignOut} style={{ background:"none", border:"none",
-            color:`${C.cream}33`, cursor:"pointer", fontSize:12, fontFamily:"'DM Sans',sans-serif" }}>
-            Sign out
-          </button>
-        </div>
 
-        {/* Progress */}
-        <div style={{ marginTop:22, height:3, background:`${C.cream}12`, borderRadius:2 }}>
-          <div style={{ height:"100%", borderRadius:2, background:`linear-gradient(90deg,${C.gold},${C.goldLight})`,
-            width:`${pct}%`, transition:"width .6s ease" }} />
+          {/* Progress arc */}
+          <div style={{ padding:"16px 20px", borderRadius:16,
+            background:"linear-gradient(135deg, #1C2E42 0%, #152233 100%)",
+            border:`1px solid ${C.creamFaint}` }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
+              <span style={{ fontSize:12, color:`${C.cream}66` }}>
+                {completed.length === 0 ? "Ready to start?" : completed.length === CHAPTERS.length ? "All chapters complete 🎉" : `${CHAPTERS.length - completed.length} chapters remaining`}
+              </span>
+              <span style={{ fontSize:13, fontWeight:500, color:pct===100?C.green:C.gold }}>{pct}%</span>
+            </div>
+            <div style={{ height:6, background:`${C.cream}10`, borderRadius:3, overflow:"hidden" }}>
+              <div style={{ height:"100%", borderRadius:3,
+                background: pct===100 ? `linear-gradient(90deg,${C.green},#6EE8A0)` : `linear-gradient(90deg,${C.gold},${C.goldLight})`,
+                width:`${pct}%`, transition:"width .8s cubic-bezier(.4,0,.2,1)" }} />
+            </div>
+            <div style={{ display:"flex", gap:4, marginTop:10, flexWrap:"wrap" }}>
+              {CHAPTERS.map(ch => (
+                <div key={ch.id} style={{ width:8, height:8, borderRadius:"50%",
+                  background: completed.includes(ch.id) ? ch.accent : `${C.cream}15`,
+                  transition:"background .3s" }} title={ch.label} />
+              ))}
+            </div>
+          </div>
         </div>
-        {pct > 0 && <div style={{ fontSize:11, color:C.gold, marginTop:6, textAlign:"right" }}>{pct}% complete</div>}
+      </div>
 
-        {/* Chapters */}
-        <div style={{ marginTop:28, display:"flex", flexDirection:"column", gap:10 }}>
+      <div style={{ maxWidth:460, margin:"0 auto", padding:"24px 20px" }}>
+
+        {/* Chapter grid */}
+        <div style={{ fontSize:10, fontWeight:500, letterSpacing:"2px", color:`${C.cream}33`,
+          textTransform:"uppercase", marginBottom:14 }}>Your chapters</div>
+
+        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
           {CHAPTERS.map((ch,i)=>{
             const done = completed.includes(ch.id);
             const partnerDone = partnerProgress?.includes(ch.id);
             return (
               <div key={ch.id} onClick={()=>onSelect(ch)}
-                style={{ padding:"18px 22px", borderRadius:14, cursor:"pointer",
-                  background: done ? `${ch.accent}15` : ch.color,
-                  border:`1px solid ${done ? ch.accent+"55" : ch.accent+"22"}`,
-                  display:"flex", alignItems:"center", gap:14,
-                  animation:`fadeUp ${.5+i*.07}s ease forwards`, opacity:0,
-                  transition:"transform .15s, border-color .2s" }}
-                onMouseEnter={e=>{e.currentTarget.style.transform="translateX(5px)"; e.currentTarget.style.borderColor=ch.accent+"77";}}
-                onMouseLeave={e=>{e.currentTarget.style.transform=""; e.currentTarget.style.borderColor=done?ch.accent+"55":ch.accent+"22";}}>
-                <span style={{ fontSize:26, flexShrink:0 }}>{ch.icon}</span>
-                <div style={{ flex:1 }}>
-                  <div style={{ fontSize:14, fontWeight:500, color:C.cream }}>{ch.label}</div>
-                  <div style={{ fontSize:11, color:`${C.cream}50`, marginTop:3, fontWeight:300 }}>
-                    {ch.tagline}
-                    {partnerDone && !done && <span style={{ color:`${C.gold}77` }}> · Partner completed</span>}
-                    {partnerDone && done && <span style={{ color:"#3DBE7A88" }}> · Both complete ✓</span>}
+                style={{ borderRadius:16, cursor:"pointer", overflow:"hidden",
+                  border:`1px solid ${done ? ch.accent+"44" : ch.accent+"18"}`,
+                  background: done
+                    ? `linear-gradient(135deg, ${ch.color} 0%, ${ch.accent}18 100%)`
+                    : `linear-gradient(135deg, ${ch.color} 0%, #0D1824 100%)`,
+                  animation:`fadeUp ${.4+i*.06}s ease forwards`, opacity:0,
+                  transition:"transform .15s, border-color .2s, box-shadow .2s",
+                  boxShadow: done ? `0 2px 20px ${ch.accent}18` : "none" }}
+                onMouseEnter={e=>{
+                  e.currentTarget.style.transform="translateY(-2px)";
+                  e.currentTarget.style.borderColor=ch.accent+"77";
+                  e.currentTarget.style.boxShadow=`0 8px 24px ${ch.accent}22`;
+                }}
+                onMouseLeave={e=>{
+                  e.currentTarget.style.transform="";
+                  e.currentTarget.style.borderColor=done?ch.accent+"44":ch.accent+"18";
+                  e.currentTarget.style.boxShadow=done?`0 2px 20px ${ch.accent}18`:"none";
+                }}>
+                <div style={{ padding:"16px 20px", display:"flex", alignItems:"center", gap:14 }}>
+                  <div style={{ width:44, height:44, borderRadius:12, flexShrink:0,
+                    background:`${ch.accent}18`, border:`1px solid ${ch.accent}33`,
+                    display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>
+                    {ch.icon}
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:14, fontWeight:500, color:C.cream }}>{ch.label}</div>
+                    <div style={{ fontSize:11, color:`${C.cream}44`, marginTop:2, fontWeight:300 }}>
+                      {ch.tagline}
+                    </div>
+                    {(partnerDone) && (
+                      <div style={{ fontSize:10, color: done ? "#3DBE7A88" : `${C.gold}77`, marginTop:4 }}>
+                        {done ? "✓ Both complete" : "Partner completed"}
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ flexShrink:0 }}>
+                    {done
+                      ? <div style={{ width:26, height:26, borderRadius:"50%",
+                          background:`linear-gradient(135deg, ${ch.accent}, ${ch.accent}AA)`,
+                          display:"flex", alignItems:"center", justifyContent:"center",
+                          boxShadow:`0 2px 8px ${ch.accent}44` }}>
+                          <span style={{ fontSize:12, color:C.navy, fontWeight:700 }}>✓</span>
+                        </div>
+                      : <div style={{ width:26, height:26, borderRadius:"50%",
+                          background:`${ch.accent}18`, border:`1px solid ${ch.accent}33`,
+                          display:"flex", alignItems:"center", justifyContent:"center" }}>
+                          <span style={{ fontSize:12, color:ch.accent }}>›</span>
+                        </div>}
                   </div>
                 </div>
-                {done
-                  ? <div style={{ width:22, height:22, borderRadius:"50%", background:ch.accent,
-                      display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                      <span style={{ fontSize:11, color:C.navy, fontWeight:600 }}>✓</span>
-                    </div>
-                  : <span style={{ fontSize:13, color:`${C.cream}33` }}>›</span>}
+                {done && (
+                  <div style={{ height:2, background:`linear-gradient(90deg, ${ch.accent}66, transparent)` }} />
+                )}
               </div>
             );
           })}
         </div>
 
-        {/* Partner Invite */}
-        <div onClick={()=>setShowPartner(true)} style={{ marginTop:14, padding:"16px 22px",
-          borderRadius:14, cursor:"pointer", background:`${C.creamFaint}`,
-          border:`1px solid ${C.creamFaint}`, display:"flex", alignItems:"center", gap:14,
-          transition:"all .2s" }}
-          onMouseEnter={e=>{e.currentTarget.style.borderColor=`${C.cream}22`;}}
-          onMouseLeave={e=>{e.currentTarget.style.borderColor=C.creamFaint;}}>
-          <span style={{ fontSize:22 }}>💍</span>
-          <div style={{ flex:1 }}>
-            <div style={{ fontSize:13, fontWeight:500, color:C.cream }}>
-              {partnerProgress ? "Partner linked ✓" : "Invite your partner"}
-            </div>
-            <div style={{ fontSize:11, color:`${C.cream}44`, marginTop:2 }}>
-              {partnerProgress ? "You can see their chapter progress above" : "See progress side-by-side and compare quiz answers"}
-            </div>
-          </div>
-          <span style={{ fontSize:12, color:`${C.cream}33` }}>›</span>
-        </div>
+        {/* Tools section */}
+        <div style={{ fontSize:10, fontWeight:500, letterSpacing:"2px", color:`${C.cream}33`,
+          textTransform:"uppercase", marginTop:28, marginBottom:14 }}>Tools</div>
 
-        {/* Ask V */}
-        <div onClick={onChat} style={{ marginTop:10, padding:"16px 22px", borderRadius:14, cursor:"pointer",
-          background:`${C.gold}12`, border:`1px solid ${C.gold}33`,
-          display:"flex", alignItems:"center", gap:14, transition:"all .2s" }}
-          onMouseEnter={e=>{e.currentTarget.style.background=`${C.gold}1E`;}}
-          onMouseLeave={e=>{e.currentTarget.style.background=`${C.gold}12`;}}>
-          <VAvatar size={34} />
-          <div>
-            <div style={{ fontSize:14, fontWeight:500, color:C.gold }}>Ask V anything</div>
-            <div style={{ fontSize:11, color:`${C.cream}44`, marginTop:2 }}>Answers matched to your situation</div>
+        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+          {/* Ask V */}
+          <div onClick={onChat} style={{ borderRadius:16, cursor:"pointer",
+            background:`linear-gradient(135deg, #1A1408 0%, #0D1824 100%)`,
+            border:`1px solid ${C.gold}33`, transition:"all .2s",
+            boxShadow:`0 2px 16px ${C.gold}0A` }}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor=`${C.gold}66`; e.currentTarget.style.boxShadow=`0 8px 24px ${C.gold}18`;}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor=`${C.gold}33`; e.currentTarget.style.boxShadow=`0 2px 16px ${C.gold}0A`;}}>
+            <div style={{ padding:"16px 20px", display:"flex", alignItems:"center", gap:14 }}>
+              <VAvatar size={44} />
+              <div>
+                <div style={{ fontSize:14, fontWeight:500, color:C.gold }}>Ask V anything</div>
+                <div style={{ fontSize:11, color:`${C.cream}44`, marginTop:2 }}>Personalized answers for your situation</div>
+              </div>
+              <span style={{ marginLeft:"auto", fontSize:12, color:`${C.gold}55` }}>›</span>
+            </div>
           </div>
-        </div>
-        <div onClick={()=>onOpenTax()} style={{ marginTop:10, padding:"16px 22px", borderRadius:14, cursor:"pointer",
-          background:"#0F2A1E", border:"1px solid #3DBE7A33",
-          display:"flex", alignItems:"center", gap:14, transition:"all .2s" }}
-          onMouseEnter={e=>{e.currentTarget.style.background="#3DBE7A15";}}
-          onMouseLeave={e=>{e.currentTarget.style.background="#0F2A1E";}}>
-          <span style={{fontSize:22}}>📊</span>
-          <div>
-            <div style={{fontSize:14, fontWeight:500, color:"#F4EFE6"}}>Tax Calculator</div>
-            <div style={{fontSize:11, color:"#F4EFE644", marginTop:2}}>Should you file jointly or separately?</div>
+
+          {/* Tax Calculator */}
+          <div onClick={()=>onOpenTax()} style={{ borderRadius:16, cursor:"pointer",
+            background:`linear-gradient(135deg, #0F2A1E 0%, #0D1824 100%)`,
+            border:"1px solid #3DBE7A33", transition:"all .2s" }}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor="#3DBE7A66"; e.currentTarget.style.boxShadow="0 8px 24px #3DBE7A18";}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor="#3DBE7A33"; e.currentTarget.style.boxShadow="";}}>
+            <div style={{ padding:"16px 20px", display:"flex", alignItems:"center", gap:14 }}>
+              <div style={{ width:44, height:44, borderRadius:12,
+                background:"#3DBE7A18", border:"1px solid #3DBE7A33",
+                display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>📊</div>
+              <div>
+                <div style={{ fontSize:14, fontWeight:500, color:C.cream }}>Tax Calculator</div>
+                <div style={{ fontSize:11, color:`${C.cream}44`, marginTop:2 }}>Joint vs. separate — see your exact savings</div>
+              </div>
+              <span style={{ marginLeft:"auto", fontSize:12, color:`${C.cream}33` }}>›</span>
+            </div>
+          </div>
+
+          {/* Partner sync */}
+          <div onClick={()=>setShowPartner(true)} style={{ borderRadius:16, cursor:"pointer",
+            background:`linear-gradient(135deg, #1A0F2A 0%, #0D1824 100%)`,
+            border:"1px solid #A04CF033", transition:"all .2s" }}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor="#A04CF066"; e.currentTarget.style.boxShadow="0 8px 24px #A04CF018";}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor="#A04CF033"; e.currentTarget.style.boxShadow="";}}>
+            <div style={{ padding:"16px 20px", display:"flex", alignItems:"center", gap:14 }}>
+              <div style={{ width:44, height:44, borderRadius:12,
+                background:"#A04CF018", border:"1px solid #A04CF033",
+                display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>💍</div>
+              <div>
+                <div style={{ fontSize:14, fontWeight:500, color:C.cream }}>
+                  {partnerProgress ? "Partner linked ✓" : "Invite your partner"}
+                </div>
+                <div style={{ fontSize:11, color:`${C.cream}44`, marginTop:2 }}>
+                  {partnerProgress ? "Progress visible on chapters above" : "See your progress side-by-side"}
+                </div>
+              </div>
+              <span style={{ marginLeft:"auto", fontSize:12, color:`${C.cream}33` }}>›</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  );
-}
 
 // ─── Lesson Screen ────────────────────────────────────────────────────────────
 function LessonScreen({ chapter, profile, onComplete, onBack }) {
@@ -1274,7 +1446,7 @@ export default function VowApp() {
       {screen==="onboarding"  && <Onboarding onComplete={handleProfileComplete} />}
       {screen==="map"         && <ChapterMap profile={profile} completed={completed} userId={user?.id}
                                    onSelect={ch=>{ setActiveChapter(ch); setScreen("lesson"); }}
-                                   onChat={()=>setScreen("chat")} onOpenTax={()=>setScreen("tax")} onSignOut={handleSignOut} />}
+                                   onChat={()=>setScreen("chat")} onOpenTax={()=>setScreen("tax")} onSignOut={handleSignOut} onProfileUpdate={(p)=>setProfile(p)} />}
       {screen==="lesson"      && activeChapter && <LessonScreen chapter={activeChapter} profile={profile}
                                    onComplete={handleChapterComplete} onBack={()=>setScreen("map")} />}
       {screen==="chat"        && <ChatScreen profile={profile} userId={user?.id} onBack={()=>setScreen("map")} />}
