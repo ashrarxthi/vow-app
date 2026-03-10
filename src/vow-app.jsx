@@ -1,3 +1,4 @@
+import TaxCalculator from './TaxCalculator.jsx'
 /**
  * VOW — Full Supabase Edition
  *
@@ -688,7 +689,7 @@ function PartnerModal({ userId, onClose }) {
 }
 
 // ─── Chapter Map ──────────────────────────────────────────────────────────────
-function ChapterMap({ profile, completed, userId, onSelect, onChat, onSignOut }) {
+function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, onSignOut }) {
   const [showPartner, setShowPartner] = useState(false);
   const [partnerProgress, setPartnerProgress] = useState(null);
   const pct = Math.round((completed.length / CHAPTERS.length) * 100);
@@ -807,6 +808,17 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onSignOut })
           <div>
             <div style={{ fontSize:14, fontWeight:500, color:C.gold }}>Ask V anything</div>
             <div style={{ fontSize:11, color:`${C.cream}44`, marginTop:2 }}>Answers matched to your situation</div>
+          </div>
+        </div>
+        <div onClick={()=>onOpenTax()} style={{ marginTop:10, padding:"16px 22px", borderRadius:14, cursor:"pointer",
+          background:"#0F2A1E", border:"1px solid #3DBE7A33",
+          display:"flex", alignItems:"center", gap:14, transition:"all .2s" }}
+          onMouseEnter={e=>{e.currentTarget.style.background="#3DBE7A15";}}
+          onMouseLeave={e=>{e.currentTarget.style.background="#0F2A1E";}}>
+          <span style={{fontSize:22}}>📊</span>
+          <div>
+            <div style={{fontSize:14, fontWeight:500, color:"#F4EFE6"}}>Tax Calculator</div>
+            <div style={{fontSize:11, color:"#F4EFE644", marginTop:2}}>Should you file jointly or separately?</div>
           </div>
         </div>
       </div>
@@ -1134,10 +1146,11 @@ export default function VowApp() {
       {screen==="onboarding"  && <Onboarding onComplete={handleProfileComplete} />}
       {screen==="map"         && <ChapterMap profile={profile} completed={completed} userId={user?.id}
                                    onSelect={ch=>{ setActiveChapter(ch); setScreen("lesson"); }}
-                                   onChat={()=>setScreen("chat")} onSignOut={handleSignOut} />}
+                                   onChat={()=>setScreen("chat")} onOpenTax={()=>setScreen("tax")} onSignOut={handleSignOut} />}
       {screen==="lesson"      && activeChapter && <LessonScreen chapter={activeChapter} profile={profile}
                                    onComplete={handleChapterComplete} onBack={()=>setScreen("map")} />}
       {screen==="chat"        && <ChatScreen profile={profile} userId={user?.id} onBack={()=>setScreen("map")} />}
+      {screen==="tax"         && <TaxCalculator onBack={()=>setScreen("map")} />}
     </>
   );
 }
