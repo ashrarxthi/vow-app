@@ -59,23 +59,43 @@ const supabase = createClient(
 const G = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'DM Sans',sans-serif;background:#0D1824;color:#F4EFE6;-webkit-font-smoothing:antialiased;}
-  ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:#C9A84C33;border-radius:2px;}
+  body{font-family:'DM Sans',sans-serif;background:#F7F4EF;color:#1A1A2E;-webkit-font-smoothing:antialiased;}
+  ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:#C9A84C44;border-radius:2px;}
   @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
   @keyframes slideLeft{from{opacity:0;transform:translateX(44px)}to{opacity:1;transform:translateX(0)}}
   @keyframes slideRight{from{opacity:0;transform:translateX(-44px)}to{opacity:1;transform:translateX(0)}}
   @keyframes pop{0%{transform:scale(0.88);opacity:0}60%{transform:scale(1.03)}100%{transform:scale(1);opacity:1}}
   @keyframes pulse{0%,100%{opacity:.65;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
-  @keyframes glow{0%,100%{box-shadow:0 0 20px #C9A84C22}50%{box-shadow:0 0 40px #C9A84C55}}
+  @keyframes glow{0%,100%{box-shadow:0 0 20px #C9A84C33}50%{box-shadow:0 0 40px #C9A84C66}}
   @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
   @keyframes shimmer{0%,100%{opacity:.3}50%{opacity:1}}
-  input:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px #152233 inset!important;-webkit-text-fill-color:#F4EFE6!important;}
+  input:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px #EDE8DF inset!important;-webkit-text-fill-color:#1A1A2E!important;}
 `;
 
+// Light mode palette
+// navy   → deep slate (text, headers)
+// navyMid/navyLight → light card surfaces
+// cream  → true off-white background
+// gold   → richer amber gold (pops on light bg)
 const C = {
-  navy:"#0D1824", navyMid:"#152233", navyLight:"#1C2E42",
-  gold:"#C9A84C", goldLight:"#E5C97A",
-  cream:"#F4EFE6", creamDim:"#F4EFE699", creamFaint:"#F4EFE618",
+  navy:"#1A1A2E", navyMid:"#EDE8DF", navyLight:"#E8E2D9",
+  gold:"#B8860B", goldLight:"#D4A017",
+  cream:"#1A1A2E", creamDim:"#1A1A2E99", creamFaint:"#1A1A2E12",
+};
+
+// Extra light mode vars used inline
+const L = {
+  bg:"#F7F4EF",
+  card:"#FFFFFF",
+  cardAlt:"#F0EBE3",
+  border:"#E2DAD0",
+  borderStrong:"#C9A84C55",
+  text:"#1A1A2E",
+  textMid:"#1A1A2E88",
+  textFaint:"#1A1A2E44",
+  gold:"#B8860B",
+  goldBg:"#FDF6E3",
+  goldBorder:"#C9A84C44",
 };
 
 // ─── Profile questions ────────────────────────────────────────────────────────
@@ -537,27 +557,27 @@ function AuthScreen({ onAuth }) {
   return (
     <div style={{ minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center",
       justifyContent:"center", padding:"40px 24px",
-      background:`radial-gradient(ellipse at 40% 30%, #1C2E42 0%, ${C.navy} 65%)`,
+      background:`radial-gradient(ellipse at 40% 30%, #EDE8DF 0%, #F7F4EF 65%)`,
       position:"relative", overflow:"hidden" }}>
       {[220,380,540].map((r,i)=>(
         <div key={i} style={{ position:"absolute", width:r, height:r, borderRadius:"50%",
-          border:`1px solid ${C.gold}${["18","10","08"][i]}`,
+          border:`1px solid ${L.gold}${["33","22","11"][i]}`,
           top:"50%", left:"50%", transform:"translate(-50%,-50%)", pointerEvents:"none" }} />
       ))}
       <div style={{ maxWidth:400, width:"100%", textAlign:"center", animation:"fadeUp .8s ease forwards", position:"relative" }}>
         <VAvatar size={60} pulse />
         <h1 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:68, fontWeight:300,
-          letterSpacing:"-3px", color:C.cream, marginTop:16, lineHeight:.9 }}>Vow</h1>
+          letterSpacing:"-3px", color:L.text, marginTop:16, lineHeight:.9 }}>Vow</h1>
         <p style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:18, fontStyle:"italic",
-          color:C.gold, marginTop:10 }}>The things your wedding planner won't tell you.</p>
+          color:L.gold, marginTop:10 }}>The things your wedding planner won't tell you.</p>
 
         <div style={{ display:"flex", gap:8, marginTop:36, marginBottom:24,
-          background:C.creamFaint, borderRadius:100, padding:4 }}>
+          background:L.border, borderRadius:100, padding:4 }}>
           {["login","signup"].map(m=>(
             <button key={m} onClick={()=>{ setMode(m); setError(""); }}
               style={{ flex:1, padding:"10px", borderRadius:100, border:"none", cursor:"pointer",
-                background: mode===m ? C.gold : "transparent",
-                color: mode===m ? C.navy : `${C.cream}66`,
+                background: mode===m ? L.gold : "transparent",
+                color: mode===m ? "#fff" : L.textMid,
                 fontSize:13, fontWeight:500, fontFamily:"'DM Sans',sans-serif", transition:"all .2s" }}>
               {m==="login" ? "Sign in" : "Create account"}
             </button>
@@ -569,26 +589,26 @@ function AuthScreen({ onAuth }) {
             onKeyDown={e=>e.key==="Enter"&&handleSubmit()}
             placeholder="your@email.com" type="email"
             style={{ width:"100%", padding:"14px 20px", borderRadius:100,
-              background:C.navyMid, border:`1px solid ${C.creamFaint}`,
-              color:C.cream, fontSize:14, fontFamily:"'DM Sans',sans-serif",
+              background:L.card, border:`1px solid ${L.border}`,
+              color:L.text, fontSize:14, fontFamily:"'DM Sans',sans-serif",
               outline:"none", textAlign:"center" }} />
           <input value={password} onChange={e=>setPassword(e.target.value)}
             onKeyDown={e=>e.key==="Enter"&&handleSubmit()}
             placeholder="Password (min 6 characters)" type="password"
             style={{ width:"100%", padding:"14px 20px", borderRadius:100,
-              background:C.navyMid, border:`1px solid ${error ? "#F04C8C66" : C.creamFaint}`,
-              color:C.cream, fontSize:14, fontFamily:"'DM Sans',sans-serif",
+              background:L.card, border:`1px solid ${error ? "#F04C8C66" : L.border}`,
+              color:L.text, fontSize:14, fontFamily:"'DM Sans',sans-serif",
               outline:"none", textAlign:"center" }} />
           {error && <p style={{ fontSize:12, color:"#F04C8C" }}>{error}</p>}
           <button onClick={handleSubmit} disabled={loading}
-            style={{ width:"100%", padding:"15px", borderRadius:100, background:C.gold,
-              color:C.navy, border:"none", fontSize:15, fontWeight:500, cursor:"pointer",
+            style={{ width:"100%", padding:"15px", borderRadius:100, background:L.gold,
+              color:"#fff", border:"none", fontSize:15, fontWeight:500, cursor:"pointer",
               fontFamily:"'DM Sans',sans-serif", display:"flex", alignItems:"center",
-              justifyContent:"center", gap:10, boxShadow:`0 8px 28px ${C.gold}44`, marginTop:4 }}>
+              justifyContent:"center", gap:10, boxShadow:`0 8px 28px ${L.gold}33`, marginTop:4 }}>
             {loading ? <Spinner /> : mode==="login" ? "Sign in →" : "Create account →"}
           </button>
         </div>
-        <p style={{ fontSize:11, color:`${C.cream}33`, marginTop:16 }}>
+        <p style={{ fontSize:11, color:L.textFaint, marginTop:16 }}>
           Free · Your progress syncs across devices
         </p>
       </div>
@@ -620,34 +640,34 @@ function Onboarding({ onComplete }) {
 
   return (
     <div style={{ minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center",
-      justifyContent:"center", padding:"40px 20px", background:C.navy }}>
+      justifyContent:"center", padding:"40px 20px", background:L.bg }}>
       <div style={{ maxWidth:440, width:"100%", animation:"fadeUp .5s ease forwards" }}>
         <div style={{ display:"flex", gap:5, marginBottom:32 }}>
           {PROFILE_QUESTIONS.map((_,i)=>(
             <div key={i} style={{ flex:1, height:3, borderRadius:2,
-              background: i<=step ? C.gold : `${C.cream}15`, transition:"background .3s" }} />
+              background: i<=step ? L.gold : L.border, transition:"background .3s" }} />
           ))}
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:28 }}>
           <VAvatar size={38} />
-          <div style={{ fontSize:11, color:`${C.cream}55`, fontWeight:300 }}>
+          <div style={{ fontSize:11, color:L.textMid, fontWeight:300 }}>
             Personalizing your experience · {step+1} of {PROFILE_QUESTIONS.length}
           </div>
         </div>
         <div key={step} style={{ animation:"slideLeft .35s ease forwards" }}>
           <div style={{ fontSize:36, marginBottom:16 }}>{q.emoji}</div>
           <h2 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:34, fontWeight:300,
-            color:C.cream, lineHeight:1.25, marginBottom:28 }}>{q.question}</h2>
+            color:L.text, lineHeight:1.25, marginBottom:28 }}>{q.question}</h2>
           <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
             {q.options.map(opt=>(
               <button key={opt.value} onClick={()=>pick(opt.value)}
                 style={{ padding:"16px 20px", borderRadius:12, cursor:"pointer", textAlign:"left",
-                  border:`1px solid ${selected===opt.value ? C.gold+"88" : C.creamFaint}`,
-                  background: selected===opt.value ? `${C.gold}18` : C.creamFaint,
-                  color:C.cream, fontSize:14, fontFamily:"'DM Sans',sans-serif",
+                  border:`1px solid ${selected===opt.value ? L.gold : L.border}`,
+                  background: selected===opt.value ? L.goldBg : L.card,
+                  color:L.text, fontSize:14, fontFamily:"'DM Sans',sans-serif",
                   transition:"all .15s", fontWeight: selected===opt.value ? 500 : 400 }}
-                onMouseEnter={e=>{if(selected!==opt.value){e.target.style.borderColor=`${C.cream}30`;}}}
-                onMouseLeave={e=>{if(selected!==opt.value){e.target.style.borderColor=C.creamFaint;}}}>
+                onMouseEnter={e=>{if(selected!==opt.value){e.target.style.borderColor=L.gold;}}}
+                onMouseLeave={e=>{if(selected!==opt.value){e.target.style.borderColor=L.border;}}}>
                 {opt.label}
               </button>
             ))}
@@ -705,14 +725,14 @@ function PartnerModal({ userId, onClose }) {
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(13,24,36,.85)", backdropFilter:"blur(8px)",
       display:"flex", alignItems:"center", justifyContent:"center", padding:20, zIndex:100 }}>
-      <div style={{ background:C.navyLight, borderRadius:20, padding:"28px 24px", maxWidth:420,
-        width:"100%", border:`1px solid ${C.creamFaint}`, animation:"pop .35s ease forwards" }}>
+      <div style={{ background:L.card, borderRadius:20, padding:"28px 24px", maxWidth:420,
+        width:"100%", border:`1px solid ${L.border}`, animation:"pop .35s ease forwards" }}>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:24 }}>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
             <VAvatar size={34} />
-            <div style={{ fontSize:15, fontWeight:500, color:C.cream }}>Partner Sync</div>
+            <div style={{ fontSize:15, fontWeight:500, color:L.text }}>Partner Sync</div>
           </div>
-          <button onClick={onClose} style={{ background:"none", border:"none", color:`${C.cream}55`,
+          <button onClick={onClose} style={{ background:"none", border:"none", color:L.textMid,
             cursor:"pointer", fontSize:22 }}>×</button>
         </div>
 
@@ -731,13 +751,13 @@ function PartnerModal({ userId, onClose }) {
 
         {tab==="invite" ? (
           <div>
-            <p style={{ fontSize:13, color:`${C.cream}66`, lineHeight:1.7, marginBottom:20, fontWeight:300 }}>
+            <p style={{ fontSize:13, color:L.textMid, lineHeight:1.7, marginBottom:20, fontWeight:300 }}>
               Share this link with your partner. Once they sign up and join, you'll both see each other's chapter progress and quiz answers side-by-side.
             </p>
-            <div style={{ padding:"14px 18px", borderRadius:12, background:C.creamFaint,
-              border:`1px solid ${C.creamFaint}`, display:"flex", alignItems:"center", justifyContent:"space-between",
+            <div style={{ padding:"14px 18px", borderRadius:12, background:L.bg,
+              border:`1px solid ${L.border}`, display:"flex", alignItems:"center", justifyContent:"space-between",
               gap:12, marginBottom:14 }}>
-              <span style={{ fontSize:13, color:C.cream, fontFamily:"monospace" }}>
+              <span style={{ fontSize:13, color:L.text, fontFamily:"monospace" }}>
                 {window.location.origin}?partner=<strong style={{ color:C.gold }}>{code}</strong>
               </span>
             </div>
@@ -748,13 +768,13 @@ function PartnerModal({ userId, onClose }) {
               transition:"all .2s" }}>
               {copied ? "✓ Copied!" : "Copy Invite Link"}
             </button>
-            <p style={{ fontSize:11, color:`${C.cream}30`, textAlign:"center", marginTop:12 }}>
+            <p style={{ fontSize:11, color:L.textFaint, textAlign:"center", marginTop:12 }}>
               Your partner code: <strong style={{ color:`${C.cream}55` }}>{code}</strong>
             </p>
           </div>
         ) : (
           <div>
-            <p style={{ fontSize:13, color:`${C.cream}66`, lineHeight:1.7, marginBottom:20, fontWeight:300 }}>
+            <p style={{ fontSize:13, color:L.textMid, lineHeight:1.7, marginBottom:20, fontWeight:300 }}>
               If your partner already has an account, enter their invite code below to link your profiles.
             </p>
             <input value={joinCode} onChange={e=>setJoinCode(e.target.value)}
@@ -769,8 +789,8 @@ function PartnerModal({ userId, onClose }) {
             {!success && (
               <button onClick={joinPartner} disabled={loading || !joinCode.trim()}
                 style={{ width:"100%", padding:"13px", borderRadius:100,
-                  background: joinCode.trim() ? C.gold : C.creamFaint,
-                  color: joinCode.trim() ? C.navy : `${C.cream}33`,
+                  background: joinCode.trim() ? L.gold : L.border,
+                  color: joinCode.trim() ? "#fff" : L.textFaint,
                   border:"none", fontSize:14, fontWeight:500, cursor:"pointer",
                   fontFamily:"'DM Sans',sans-serif", display:"flex", alignItems:"center", justifyContent:"center", gap:10 }}>
                 {loading ? <Spinner /> : "Link Accounts →"}
@@ -809,23 +829,23 @@ function ProfileModal({ profile, userId, onSave, onClose }) {
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(13,24,36,.92)", backdropFilter:"blur(10px)",
       display:"flex", alignItems:"center", justifyContent:"center", padding:20, zIndex:200 }}>
-      <div style={{ background:C.navyLight, borderRadius:24, padding:"28px 24px", maxWidth:440,
-        width:"100%", border:`1px solid ${C.creamFaint}`, animation:"pop .3s ease forwards",
+      <div style={{ background:L.card, borderRadius:24, padding:"28px 24px", maxWidth:440,
+        width:"100%", border:`1px solid ${L.border}`, animation:"pop .3s ease forwards",
         maxHeight:"90vh", overflowY:"auto" }}>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
-          <div style={{ fontSize:13, color:`${C.cream}55` }}>Edit your profile · {step+1}/{PROFILE_QUESTIONS.length}</div>
+          <div style={{ fontSize:13, color:L.textMid }}>Edit your profile · {step+1}/{PROFILE_QUESTIONS.length}</div>
           <button onClick={onClose} style={{ background:"none", border:"none",
-            color:`${C.cream}44`, cursor:"pointer", fontSize:22, lineHeight:1 }}>×</button>
+            color:L.textMid, cursor:"pointer", fontSize:22, lineHeight:1 }}>×</button>
         </div>
         <div style={{ display:"flex", gap:4, marginBottom:24 }}>
           {PROFILE_QUESTIONS.map((_,i) => (
             <div key={i} onClick={() => setStep(i)} style={{ flex:1, height:3, borderRadius:2,
-              background: i<=step ? C.gold : `${C.cream}15`, cursor:"pointer", transition:"background .2s" }} />
+              background: i<=step ? L.gold : L.border, cursor:"pointer", transition:"background .2s" }} />
           ))}
         </div>
         <div style={{ fontSize:28, marginBottom:12 }}>{q.emoji}</div>
         <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:26, fontWeight:300,
-          color:C.cream, lineHeight:1.3, marginBottom:20 }}>{q.question}</div>
+          color:L.text, lineHeight:1.3, marginBottom:20 }}>{q.question}</div>
         <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
           {q.options.map(opt => {
             const selected = answers[q.id] === opt.value;
@@ -838,7 +858,7 @@ function ProfileModal({ profile, userId, onSave, onClose }) {
                   fontWeight: selected ? 500 : 400, transition:"all .15s",
                   display:"flex", alignItems:"center", justifyContent:"space-between" }}>
                 {opt.label}
-                {selected && <span style={{ color:C.gold, fontSize:14 }}>✓</span>}
+                {selected && <span style={{ color:L.gold, fontSize:14 }}>✓</span>}
               </button>
             );
           })}
@@ -846,7 +866,7 @@ function ProfileModal({ profile, userId, onSave, onClose }) {
         {isLast && (
           <button onClick={() => { onSave(answers); onClose(); }} disabled={saving}
             style={{ width:"100%", marginTop:16, padding:"14px", borderRadius:100,
-              background:C.gold, color:C.navy, border:"none", fontSize:14, fontWeight:500,
+              background:L.gold, color:"#fff", border:"none", fontSize:14, fontWeight:500,
               cursor:"pointer", fontFamily:"'DM Sans',sans-serif",
               display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
             {saving ? "Saving..." : "Save changes ✓"}
@@ -890,7 +910,7 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, o
   }[profile?.stage] || "Your profile";
 
   return (
-    <div style={{ minHeight:"100vh", background:`linear-gradient(170deg, #0D1F2D 0%, #0D1824 60%)`, paddingBottom:80 }}>
+    <div style={{ minHeight:"100vh", background:L.bg, paddingBottom:80 }}>
       {showPartner && <PartnerModal userId={userId} onClose={()=>setShowPartner(false)} />}
       {showProfile && <ProfileModal profile={profile} userId={userId}
         onSave={(p)=>{ onProfileUpdate(p); setShowProfile(false); }}
@@ -898,32 +918,32 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, o
 
       {/* Hero header */}
       <div style={{ padding:"0 20px", paddingTop:48, paddingBottom:32,
-        background:"linear-gradient(180deg, #0F2235 0%, transparent 100%)",
-        borderBottom:`1px solid ${C.creamFaint}` }}>
+        background:L.card,
+        borderBottom:`1px solid ${L.border}` }}>
         <div style={{ maxWidth:460, margin:"0 auto" }}>
           <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:20 }}>
             <div style={{ display:"flex", alignItems:"center", gap:12 }}>
               <VAvatar size={44} pulse={pct < 100} />
               <div>
                 <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:32,
-                  fontWeight:300, color:C.cream, lineHeight:1 }}>Vow</div>
-                <div style={{ fontSize:11, color:C.gold, marginTop:3, letterSpacing:".5px" }}>{stageLabel}</div>
+                  fontWeight:300, color:L.text, lineHeight:1 }}>Vow</div>
+                <div style={{ fontSize:11, color:L.gold, marginTop:3, letterSpacing:".5px" }}>{stageLabel}</div>
               </div>
             </div>
             <div style={{ display:"flex", alignItems:"center", gap:8 }}>
               <button onClick={()=>setShowProfile(true)}
-                style={{ width:36, height:36, borderRadius:"50%", background:C.creamFaint,
-                  border:`1px solid ${C.creamFaint}`, cursor:"pointer", fontSize:16,
+                style={{ width:36, height:36, borderRadius:"50%", background:L.card,
+                  border:`1px solid ${L.border}`, cursor:"pointer", fontSize:16,
                   display:"flex", alignItems:"center", justifyContent:"center", transition:"all .2s" }}
                 title="Edit profile"
-                onMouseEnter={e=>{e.currentTarget.style.borderColor=`${C.gold}66`; e.currentTarget.style.background=`${C.gold}18`;}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor=C.creamFaint; e.currentTarget.style.background=C.creamFaint;}}>
+                onMouseEnter={e=>{e.currentTarget.style.borderColor=L.gold; e.currentTarget.style.background=L.goldBg;}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor=L.border; e.currentTarget.style.background=L.card;}}>
                 👤
               </button>
               <button onClick={onSignOut}
-                style={{ width:36, height:36, borderRadius:"50%", background:C.creamFaint,
-                  border:`1px solid ${C.creamFaint}`, cursor:"pointer", fontSize:14,
-                  display:"flex", alignItems:"center", justifyContent:"center", color:`${C.cream}55`,
+                style={{ width:36, height:36, borderRadius:"50%", background:L.card,
+                  border:`1px solid ${L.border}`, cursor:"pointer", fontSize:14,
+                  display:"flex", alignItems:"center", justifyContent:"center", color:L.textMid,
                   fontFamily:"'DM Sans',sans-serif", transition:"all .2s" }}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor=`${C.cream}22`;}}
                 onMouseLeave={e=>{e.currentTarget.style.borderColor=C.creamFaint;}}>
@@ -934,23 +954,23 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, o
 
           {/* Progress arc */}
           <div style={{ padding:"16px 20px", borderRadius:16,
-            background:"linear-gradient(135deg, #1C2E42 0%, #152233 100%)",
-            border:`1px solid ${C.creamFaint}` }}>
+            background:L.card,
+            border:`1px solid ${L.border}` }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
-              <span style={{ fontSize:12, color:`${C.cream}66` }}>
+              <span style={{ fontSize:12, color:L.textMid }}>
                 {completed.length === 0 ? "Ready to start?" : completed.length === CHAPTERS.length ? "All chapters complete 🎉" : `${CHAPTERS.length - completed.length} chapters remaining`}
               </span>
-              <span style={{ fontSize:13, fontWeight:500, color:pct===100?C.green:C.gold }}>{pct}%</span>
+              <span style={{ fontSize:13, fontWeight:500, color:pct===100?"#16a34a":L.gold }}>{pct}%</span>
             </div>
-            <div style={{ height:6, background:`${C.cream}10`, borderRadius:3, overflow:"hidden" }}>
+            <div style={{ height:6, background:L.border, borderRadius:3, overflow:"hidden" }}>
               <div style={{ height:"100%", borderRadius:3,
-                background: pct===100 ? `linear-gradient(90deg,${C.green},#6EE8A0)` : `linear-gradient(90deg,${C.gold},${C.goldLight})`,
+                background: pct===100 ? `linear-gradient(90deg,#16a34a,#4ade80)` : `linear-gradient(90deg,${L.gold},${L.goldLight})`,
                 width:`${pct}%`, transition:"width .8s cubic-bezier(.4,0,.2,1)" }} />
             </div>
             <div style={{ display:"flex", gap:4, marginTop:10, flexWrap:"wrap" }}>
               {CHAPTERS.map(ch => (
                 <div key={ch.id} style={{ width:8, height:8, borderRadius:"50%",
-                  background: completed.includes(ch.id) ? ch.accent : `${C.cream}15`,
+                  background: completed.includes(ch.id) ? ch.accent : L.border,
                   transition:"background .3s" }} title={ch.label} />
               ))}
             </div>
@@ -961,7 +981,7 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, o
       <div style={{ maxWidth:460, margin:"0 auto", padding:"24px 20px" }}>
 
         {/* Chapter grid */}
-        <div style={{ fontSize:10, fontWeight:500, letterSpacing:"2px", color:`${C.cream}33`,
+        <div style={{ fontSize:10, fontWeight:500, letterSpacing:"2px", color:L.textFaint,
           textTransform:"uppercase", marginBottom:14 }}>Your chapters</div>
 
         <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
@@ -972,9 +992,7 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, o
               <div key={ch.id} onClick={()=>onSelect(ch)}
                 style={{ borderRadius:16, cursor:"pointer", overflow:"hidden",
                   border:`1px solid ${done ? ch.accent+"44" : ch.accent+"18"}`,
-                  background: done
-                    ? `linear-gradient(135deg, ${ch.color} 0%, ${ch.accent}18 100%)`
-                    : `linear-gradient(135deg, ${ch.color} 0%, #0D1824 100%)`,
+                  background: done ? `${ch.accent}12` : L.card,
                   animation:`fadeUp ${.4+i*.06}s ease forwards`, opacity:0,
                   transition:"transform .15s, border-color .2s, box-shadow .2s",
                   boxShadow: done ? `0 2px 20px ${ch.accent}18` : "none" }}
@@ -995,8 +1013,8 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, o
                     {ch.icon}
                   </div>
                   <div style={{ flex:1, minWidth:0 }}>
-                    <div style={{ fontSize:14, fontWeight:500, color:C.cream }}>{ch.label}</div>
-                    <div style={{ fontSize:11, color:`${C.cream}44`, marginTop:2, fontWeight:300 }}>
+                    <div style={{ fontSize:14, fontWeight:500, color:L.text }}>{ch.label}</div>
+                    <div style={{ fontSize:11, color:L.textMid, marginTop:2, fontWeight:300 }}>
                       {ch.tagline}
                     </div>
                     {(partnerDone) && (
@@ -1029,22 +1047,22 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, o
         </div>
 
         {/* Tools section */}
-        <div style={{ fontSize:10, fontWeight:500, letterSpacing:"2px", color:`${C.cream}33`,
+        <div style={{ fontSize:10, fontWeight:500, letterSpacing:"2px", color:L.textFaint,
           textTransform:"uppercase", marginTop:28, marginBottom:14 }}>Tools</div>
 
         <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
           {/* Ask V */}
           <div onClick={onChat} style={{ borderRadius:16, cursor:"pointer",
-            background:`linear-gradient(135deg, #1A1408 0%, #0D1824 100%)`,
-            border:`1px solid ${C.gold}33`, transition:"all .2s",
+            background:L.goldBg,
+            border:`1px solid ${L.goldBorder}`, transition:"all .2s",
             boxShadow:`0 2px 16px ${C.gold}0A` }}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor=`${C.gold}66`; e.currentTarget.style.boxShadow=`0 8px 24px ${C.gold}18`;}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor=`${C.gold}33`; e.currentTarget.style.boxShadow=`0 2px 16px ${C.gold}0A`;}}>
+            onMouseEnter={e=>{e.currentTarget.style.borderColor=L.gold; e.currentTarget.style.boxShadow=`0 8px 24px ${L.gold}22`;}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor=L.goldBorder; e.currentTarget.style.boxShadow="";}}>
             <div style={{ padding:"16px 20px", display:"flex", alignItems:"center", gap:14 }}>
               <VAvatar size={44} />
               <div>
-                <div style={{ fontSize:14, fontWeight:500, color:C.gold }}>Ask V anything</div>
-                <div style={{ fontSize:11, color:`${C.cream}44`, marginTop:2 }}>Personalized answers for your situation</div>
+                <div style={{ fontSize:14, fontWeight:500, color:L.gold }}>Ask V anything</div>
+                <div style={{ fontSize:11, color:L.textMid, marginTop:2 }}>Personalized answers for your situation</div>
               </div>
               <span style={{ marginLeft:"auto", fontSize:12, color:`${C.gold}55` }}>›</span>
             </div>
@@ -1052,8 +1070,8 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, o
 
           {/* Tax Calculator */}
           <div onClick={()=>onOpenTax()} style={{ borderRadius:16, cursor:"pointer",
-            background:`linear-gradient(135deg, #0F2A1E 0%, #0D1824 100%)`,
-            border:"1px solid #3DBE7A33", transition:"all .2s" }}
+            background:"#F0FDF4",
+            border:"1px solid #3DBE7A66", transition:"all .2s" }}
             onMouseEnter={e=>{e.currentTarget.style.borderColor="#3DBE7A66"; e.currentTarget.style.boxShadow="0 8px 24px #3DBE7A18";}}
             onMouseLeave={e=>{e.currentTarget.style.borderColor="#3DBE7A33"; e.currentTarget.style.boxShadow="";}}>
             <div style={{ padding:"16px 20px", display:"flex", alignItems:"center", gap:14 }}>
@@ -1061,8 +1079,8 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, o
                 background:"#3DBE7A18", border:"1px solid #3DBE7A33",
                 display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>📊</div>
               <div>
-                <div style={{ fontSize:14, fontWeight:500, color:C.cream }}>Tax Calculator</div>
-                <div style={{ fontSize:11, color:`${C.cream}44`, marginTop:2 }}>Joint vs. separate — see your exact savings</div>
+                <div style={{ fontSize:14, fontWeight:500, color:L.text }}>Tax Calculator</div>
+                <div style={{ fontSize:11, color:L.textMid, marginTop:2 }}>Joint vs. separate — see your exact savings</div>
               </div>
               <span style={{ marginLeft:"auto", fontSize:12, color:`${C.cream}33` }}>›</span>
             </div>
@@ -1070,8 +1088,8 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, o
 
           {/* Partner sync */}
           <div onClick={()=>setShowPartner(true)} style={{ borderRadius:16, cursor:"pointer",
-            background:`linear-gradient(135deg, #1A0F2A 0%, #0D1824 100%)`,
-            border:"1px solid #A04CF033", transition:"all .2s" }}
+            background:"#FAF5FF",
+            border:"1px solid #A04CF055", transition:"all .2s" }}
             onMouseEnter={e=>{e.currentTarget.style.borderColor="#A04CF066"; e.currentTarget.style.boxShadow="0 8px 24px #A04CF018";}}
             onMouseLeave={e=>{e.currentTarget.style.borderColor="#A04CF033"; e.currentTarget.style.boxShadow="";}}>
             <div style={{ padding:"16px 20px", display:"flex", alignItems:"center", gap:14 }}>
@@ -1079,7 +1097,7 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, o
                 background:"#A04CF018", border:"1px solid #A04CF033",
                 display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>💍</div>
               <div>
-                <div style={{ fontSize:14, fontWeight:500, color:C.cream }}>
+                <div style={{ fontSize:14, fontWeight:500, color:L.text }}>
                   {partnerProgress ? "Partner linked ✓" : "Invite your partner"}
                 </div>
                 <div style={{ fontSize:11, color:`${C.cream}44`, marginTop:2 }}>
@@ -1110,42 +1128,43 @@ function LessonScreen({ chapter, profile, onComplete, onBack }) {
 
   return (
     <div style={{ minHeight:"100vh", display:"flex", flexDirection:"column",
-      background:`radial-gradient(ellipse at 20% 0%, ${chapter.color} 0%, ${C.navy} 60%)` }}>
+      background:L.bg }}>
       <div style={{ padding:"16px 20px", display:"flex", alignItems:"center", gap:12 }}>
         <button onClick={onBack} style={{ background:"none", border:"none", color:`${C.cream}55`,
           cursor:"pointer", fontSize:22, padding:"4px 8px" }}>←</button>
         <div style={{ flex:1 }}>
-          <div style={{ fontSize:11, color:chapter.accent, fontWeight:500, letterSpacing:"1px", textTransform:"uppercase" }}>{chapter.label}</div>
+          <div style={{ fontSize:11, color:chapter.accent, fontWeight:600, letterSpacing:"1px", textTransform:"uppercase" }}>{chapter.label}</div>
         </div>
-        <div style={{ fontSize:12, color:`${C.cream}44` }}>{idx+1} / {cards.length}</div>
+        <div style={{ fontSize:12, color:L.textMid }}>{idx+1} / {cards.length}</div>
       </div>
       <div style={{ display:"flex", gap:6, padding:"0 20px 16px" }}>
         {cards.map((_,i)=>(
           <div key={i} style={{ height:3, borderRadius:2, flex:1,
-            background: i<=idx ? chapter.accent : `${C.cream}18`, transition:"background .3s" }} />
+            background: i<=idx ? chapter.accent : L.border, transition:"background .3s" }} />
         ))}
       </div>
       <div key={idx} style={{ flex:1, padding:"4px 18px 20px", display:"flex", flexDirection:"column",
         animation:`${dir==="right"?"slideLeft":"slideRight"} .35s ease forwards` }}>
         <div style={{ flex:1, padding:"24px 22px", borderRadius:20,
-          background:`linear-gradient(145deg, ${chapter.color} 0%, ${C.navyLight}88 100%)`,
-          border:`1px solid ${chapter.accent}33`, display:"flex", flexDirection:"column" }}>
+          background:L.card,
+          border:`1px solid ${chapter.accent}44`,
+          boxShadow:`0 4px 24px ${chapter.accent}14`, display:"flex", flexDirection:"column" }}>
           <div style={{ fontSize:40, marginBottom:16 }}>{card.emoji}</div>
           <div style={{ fontSize:10, fontWeight:500, letterSpacing:"2px", textTransform:"uppercase",
             color:chapter.accent, marginBottom:10 }}>{card.hookLabel}</div>
           <p style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:26, fontWeight:400,
-            color:C.cream, lineHeight:1.35, marginBottom:18 }}>"{card.hook}"</p>
-          <p style={{ fontSize:14, color:C.creamDim, lineHeight:1.8, fontWeight:300, flex:1 }}>{card.body}</p>
+            color:L.text, lineHeight:1.35, marginBottom:18 }}>"{card.hook}"</p>
+          <p style={{ fontSize:14, color:L.textMid, lineHeight:1.8, fontWeight:300, flex:1 }}>{card.body}</p>
           <div style={{ marginTop:20, padding:"14px 16px", borderRadius:12,
-            background:`${chapter.accent}15`, border:`1px solid ${chapter.accent}33` }}>
+            background:`${chapter.accent}10`, border:`1px solid ${chapter.accent}44` }}>
             <div style={{ fontSize:10, fontWeight:500, letterSpacing:"1.5px", color:chapter.accent,
               textTransform:"uppercase", marginBottom:5 }}>What this means for you</div>
-            <p style={{ fontSize:13, color:C.cream, lineHeight:1.65 }}>{card.takeaway}</p>
+            <p style={{ fontSize:13, color:L.text, lineHeight:1.65 }}>{card.takeaway}</p>
           </div>
         </div>
         <div style={{ display:"flex", gap:10, marginTop:14 }}>
           <button onClick={prev} style={{ flex:1, padding:"14px", borderRadius:100,
-            background:C.creamFaint, border:"none", color:`${C.cream}66`, cursor:"pointer",
+            background:L.card, border:`1px solid ${L.border}`, color:L.textMid, cursor:"pointer",
             fontSize:14, fontFamily:"'DM Sans',sans-serif" }}
             onMouseEnter={e=>{e.target.style.background=`${C.cream}14`;}}
             onMouseLeave={e=>{e.target.style.background=C.creamFaint;}}>
@@ -1173,7 +1192,7 @@ function MonetizationScreen({ chapter, onComplete }) {
   return (
     <div style={{ minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center",
       justifyContent:"center", padding:"32px 20px",
-      background:`radial-gradient(ellipse at 50% 30%, ${chapter.color} 0%, ${C.navy} 70%)` }}>
+      background:L.bg }}>
       <div style={{ maxWidth:420, width:"100%", textAlign:"center", animation:"pop .5s ease forwards" }}>
         <div style={{ width:64, height:64, borderRadius:"50%", background:`${chapter.accent}22`,
           border:`2px solid ${chapter.accent}66`, display:"flex", alignItems:"center",
@@ -1181,8 +1200,8 @@ function MonetizationScreen({ chapter, onComplete }) {
         <div style={{ fontSize:10, fontWeight:500, letterSpacing:"2px", color:chapter.accent,
           textTransform:"uppercase", marginBottom:8 }}>Chapter complete</div>
         <h2 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:36, fontWeight:300,
-          color:C.cream, lineHeight:1.2 }}>You nailed {chapter.label}.</h2>
-        <p style={{ fontSize:14, color:`${C.cream}55`, marginTop:10, lineHeight:1.7, fontWeight:300 }}>
+          color:L.text, lineHeight:1.2 }}>You nailed {chapter.label}.</h2>
+        <p style={{ fontSize:14, color:L.textMid, marginTop:10, lineHeight:1.7, fontWeight:300 }}>
           Take the next step on what you just learned.
         </p>
         <div style={{ marginTop:28, padding:"22px", borderRadius:18, background:`${tc}12`,
@@ -1195,20 +1214,20 @@ function MonetizationScreen({ chapter, onComplete }) {
           )}
           <div style={{ fontSize:10, fontWeight:500, letterSpacing:"1.5px", color:tc,
             textTransform:"uppercase", marginBottom:8 }}>{tl}</div>
-          <div style={{ fontSize:17, fontWeight:500, color:C.cream, marginBottom:6 }}>{m.headline}</div>
-          <div style={{ fontSize:13, color:`${C.cream}66`, lineHeight:1.65, fontWeight:300, marginBottom:18 }}>{m.sub}</div>
+          <div style={{ fontSize:17, fontWeight:500, color:L.text, marginBottom:6 }}>{m.headline}</div>
+          <div style={{ fontSize:13, color:L.textMid, lineHeight:1.65, fontWeight:300, marginBottom:18 }}>{m.sub}</div>
           <button style={{ width:"100%", padding:"14px", borderRadius:100, background:tc,
-            color:C.navy, border:"none", fontSize:14, fontWeight:500, cursor:"pointer",
+            color:"#fff", border:"none", fontSize:14, fontWeight:500, cursor:"pointer",
             fontFamily:"'DM Sans',sans-serif", boxShadow:`0 6px 22px ${tc}44` }}>
             {m.cta}
           </button>
-          {m.ctaSub && <div style={{ fontSize:11, color:`${C.cream}30`, textAlign:"center", marginTop:10 }}>{m.ctaSub}</div>}
+          {m.ctaSub && <div style={{ fontSize:11, color:L.textFaint, textAlign:"center", marginTop:10 }}>{m.ctaSub}</div>}
         </div>
         <button onClick={onComplete} style={{ marginTop:14, width:"100%", padding:"13px", borderRadius:100,
-          background:"transparent", border:`1px solid ${C.creamFaint}`, color:`${C.cream}55`,
+          background:"transparent", border:`1px solid ${L.border}`, color:L.textMid,
           fontSize:14, cursor:"pointer", fontFamily:"'DM Sans',sans-serif" }}
-          onMouseEnter={e=>{e.target.style.color=C.cream; e.target.style.borderColor=`${C.cream}33`;}}
-          onMouseLeave={e=>{e.target.style.color=`${C.cream}55`; e.target.style.borderColor=C.creamFaint;}}>
+          onMouseEnter={e=>{e.target.style.color=L.text; e.target.style.borderColor=L.gold;}}
+          onMouseLeave={e=>{e.target.style.color=L.textMid; e.target.style.borderColor=L.border;}}>
           ← Back to all chapters
         </button>
       </div>
@@ -1273,26 +1292,26 @@ function ChatScreen({ profile, userId, onBack }) {
     ));
 
   return (
-    <div style={{ minHeight:"100vh", display:"flex", flexDirection:"column", background:C.navy }}>
+    <div style={{ minHeight:"100vh", display:"flex", flexDirection:"column", background:L.bg }}>
       <div style={{ padding:"14px 18px", display:"flex", alignItems:"center", gap:10,
-        borderBottom:`1px solid ${C.creamFaint}`, background:C.navyLight }}>
+        borderBottom:`1px solid ${L.border}`, background:L.card }}>
         <button onClick={onBack} style={{ background:"none", border:"none", color:`${C.cream}55`,
           cursor:"pointer", fontSize:20, padding:"4px 8px" }}>←</button>
         <VAvatar size={34} pulse />
         <div>
-          <div style={{ fontSize:14, fontWeight:500, color:C.cream }}>Ask V</div>
-          <div style={{ fontSize:10, color:C.gold, marginTop:1 }}>● Personalized to your profile</div>
+          <div style={{ fontSize:14, fontWeight:500, color:L.text }}>Ask V</div>
+          <div style={{ fontSize:10, color:L.gold, marginTop:1 }}>● Personalized to your profile</div>
         </div>
       </div>
       {msgs.length <= 1 && (
-        <div style={{ padding:"12px 14px", borderBottom:`1px solid ${C.creamFaint}`,
+        <div style={{ padding:"12px 14px", borderBottom:`1px solid ${L.border}`,
           display:"flex", gap:8, flexWrap:"wrap" }}>
           {SUGGESTIONS.map(s=>(
             <button key={s} onClick={()=>send(s)} style={{ padding:"7px 14px", borderRadius:100,
-              background:C.creamFaint, border:`1px solid ${C.creamFaint}`, color:`${C.cream}88`,
+              background:L.card, border:`1px solid ${L.border}`, color:L.textMid,
               fontSize:12, cursor:"pointer", fontFamily:"'DM Sans',sans-serif", transition:"all .15s" }}
-              onMouseEnter={e=>{e.target.style.background=`${C.cream}14`; e.target.style.color=C.cream;}}
-              onMouseLeave={e=>{e.target.style.background=C.creamFaint; e.target.style.color=`${C.cream}88`;}}>
+              onMouseEnter={e=>{e.target.style.background=L.goldBg; e.target.style.color=L.gold;}}
+              onMouseLeave={e=>{e.target.style.background=L.card; e.target.style.color=L.textMid;}}>
               {s}
             </button>
           ))}
@@ -1305,10 +1324,11 @@ function ChatScreen({ profile, userId, onBack }) {
             {m.role==="assistant" && <VAvatar size={30} />}
             <div style={{ maxWidth:"80%", padding:"13px 17px",
               borderRadius:m.role==="user"?"20px 20px 4px 20px":"4px 20px 20px 20px",
-              background:m.role==="user"?C.gold:C.creamFaint,
-              color:m.role==="user"?C.navy:C.cream, fontSize:14, lineHeight:1.75,
+              background:m.role==="user"?L.gold:L.card,
+              color:m.role==="user"?"#fff":L.text, fontSize:14, lineHeight:1.75,
               fontWeight:m.role==="user"?500:300,
-              border:m.role==="assistant"?`1px solid ${C.creamFaint}`:"none" }}>
+              border:m.role==="assistant"?`1px solid ${L.border}`:"none",
+              boxShadow:m.role==="assistant"?`0 2px 8px ${L.gold}0A`:"none" }}>
               {m.role==="assistant" ? renderMsg(m.content) : m.content}
             </div>
           </div>
@@ -1329,18 +1349,18 @@ function ChatScreen({ profile, userId, onBack }) {
         )}
         <div ref={bottomRef} />
       </div>
-      <div style={{ padding:"12px 14px", borderTop:`1px solid ${C.creamFaint}`,
-        background:C.navyLight, display:"flex", gap:10 }}>
+      <div style={{ padding:"12px 14px", borderTop:`1px solid ${L.border}`,
+        background:L.card, display:"flex", gap:10 }}>
         <input value={input} onChange={e=>setInput(e.target.value)}
           onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&send()}
           placeholder="Ask anything about marriage finances..."
           style={{ flex:1, padding:"13px 18px", borderRadius:100,
-            background:C.creamFaint, border:`1px solid ${C.creamFaint}`,
-            color:C.cream, fontSize:14, fontFamily:"'DM Sans',sans-serif", outline:"none" }} />
+            background:L.bg, border:`1px solid ${L.border}`,
+            color:L.text, fontSize:14, fontFamily:"'DM Sans',sans-serif", outline:"none" }} />
         <button onClick={()=>send()} disabled={!input.trim()}
           style={{ width:46, height:46, borderRadius:"50%", flexShrink:0,
-            background:input.trim()?C.gold:`${C.cream}18`, border:"none",
-            color:input.trim()?C.navy:`${C.cream}33`, fontSize:16,
+            background:input.trim()?L.gold:L.border, border:"none",
+            color:input.trim()?"#fff":L.textFaint, fontSize:16,
             cursor:input.trim()?"pointer":"default", transition:"all .2s" }}>→</button>
       </div>
     </div>
@@ -1435,7 +1455,7 @@ export default function VowApp() {
 
   if (screen === "loading") {
     return (
-      <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:C.navy }}>
+      <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:L.bg }}>
         <VAvatar size={56} pulse />
       </div>
     );
