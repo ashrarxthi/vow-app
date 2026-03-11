@@ -1068,42 +1068,40 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, o
           textTransform:"uppercase", marginTop:32, marginBottom:14 }}>Tools</div>
 
         <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-          {[
-            { label:"Ask V anything", sub:"Personalized answers for your situation", icon:null, isV:true,
-              onClick:onChat, bg:"#FDF6E3", border:"#C9A84C44", hoverBorder:"#B8860B", color:"#B8860B" },
-            { label:"Tax Calculator", sub:"Joint vs. separate — see your exact savings", icon:"📊",
-              onClick:onOpenTax, bg:"#F0FDF4", border:"#3DBE7A44", hoverBorder:"#16a34a", color:"#16a34a" },
-            { label:"Marriage Checklist", sub:"Your personalized financial to-do list", icon:"✅",
-              onClick:onOpenChecklist, bg:"#FFFBEB", border:"#FCD34D55", hoverBorder:"#D97706", color:"#D97706" },
-            { label:"Money Compatibility", sub:"10 questions. Compare with your partner.", icon:"💑",
-              onClick:onOpenQuiz, bg:"#F5F3FF", border:"#A04CF044", hoverBorder:"#7C3AED", color:"#7C3AED" },
-          ].map((tool,i) => (
-            <div key={i} onClick={tool.onClick}
-              style={{ borderRadius:14, cursor:"pointer", background:tool.bg,
-                border:`1px solid ${tool.border}`, transition:"all .18s",
-                animation:`fadeUp ${.8+i*.06}s ease forwards`, opacity:0 }}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor=tool.hoverBorder; e.currentTarget.style.boxShadow=`0 4px 20px ${tool.hoverBorder}18`;}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor=tool.border; e.currentTarget.style.boxShadow="";}}>
-              <div style={{ padding:"13px 16px", display:"flex", alignItems:"center", gap:12 }}>
-                {tool.isV ? <VAvatar size={36} /> :
-                  <div style={{ width:36, height:36, borderRadius:10, background:"#fff",
-                    border:`1px solid ${tool.border}`, display:"flex",
-                    alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0 }}>
-                    {tool.icon}
-                  </div>}
-                <div style={{ flex:1 }}>
-                  <div style={{ fontSize:13, fontWeight:500, color:tool.isV?tool.color:L.text }}>{tool.label}</div>
-                  <div style={{ fontSize:11, color:L.textFaint, marginTop:1 }}>{tool.sub}</div>
+          {/* 2x2 grid of tool boxes */}
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10,
+            animation:"fadeUp .8s ease forwards", opacity:0 }}>
+            {[
+              { label:"Ask V", sub:"Get answers", icon:null, isV:true,
+                onClick:onChat, bg:"#FDF6E3", border:"#C9A84C33", hoverBorder:"#B8860B", color:"#B8860B" },
+              { label:"Tax Calc", sub:"Joint vs. separate", icon:"📊",
+                onClick:onOpenTax, bg:"#F0FDF4", border:"#3DBE7A33", hoverBorder:"#16a34a", color:"#16a34a" },
+              { label:"Checklist", sub:"Your to-do list", icon:"✅",
+                onClick:onOpenChecklist, bg:"#FFFBEB", border:"#FCD34D44", hoverBorder:"#D97706", color:"#D97706" },
+              { label:"Compatibility", sub:"Compare with partner", icon:"💑",
+                onClick:onOpenQuiz, bg:"#F5F3FF", border:"#A04CF033", hoverBorder:"#7C3AED", color:"#7C3AED" },
+            ].map((tool,i) => (
+              <div key={i} onClick={tool.onClick}
+                style={{ borderRadius:16, cursor:"pointer", background:tool.bg,
+                  border:`1px solid ${tool.border}`, transition:"all .18s",
+                  padding:"16px 14px" }}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor=tool.hoverBorder; e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow=`0 6px 20px ${tool.hoverBorder}22`;}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor=tool.border; e.currentTarget.style.transform=""; e.currentTarget.style.boxShadow="";}}>
+                <div style={{ marginBottom:10 }}>
+                  {tool.isV
+                    ? <VAvatar size={32} />
+                    : <span style={{ fontSize:24 }}>{tool.icon}</span>}
                 </div>
-                <span style={{ fontSize:12, color:L.textFaint }}>›</span>
+                <div style={{ fontSize:13, fontWeight:600, color:L.text, marginBottom:3 }}>{tool.label}</div>
+                <div style={{ fontSize:11, color:L.textFaint, lineHeight:1.4 }}>{tool.sub}</div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
 
-          {/* Partner sync */}
+          {/* Partner sync — full width below grid */}
           <div onClick={()=>setShowPartner(true)} style={{ borderRadius:14, cursor:"pointer",
             background:L.card, border:`1px solid ${L.border}`, transition:"all .18s",
-            animation:"fadeUp 1.1s ease forwards", opacity:0 }}
+            animation:"fadeUp 1s ease forwards", opacity:0 }}
             onMouseEnter={e=>{e.currentTarget.style.borderColor="#A04CF066"; e.currentTarget.style.boxShadow="0 4px 20px #A04CF018";}}
             onMouseLeave={e=>{e.currentTarget.style.borderColor=L.border; e.currentTarget.style.boxShadow="";}}>
             <div style={{ padding:"13px 16px", display:"flex", alignItems:"center", gap:12 }}>
