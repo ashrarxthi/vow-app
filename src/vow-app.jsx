@@ -980,162 +980,138 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, o
         </div>
       </div>
 
-      <div style={{ maxWidth:460, margin:"0 auto", padding:"24px 20px" }}>
+      <div style={{ maxWidth:460, margin:"0 auto", padding:"20px 16px" }}>
 
-        {/* Chapter grid */}
-        <div style={{ fontSize:10, fontWeight:500, letterSpacing:"2px", color:L.textFaint,
-          textTransform:"uppercase", marginBottom:14 }}>Your chapters</div>
+        {/* Chapter steps — numbered, single color family */}
+        <div style={{ fontSize:10, fontWeight:600, letterSpacing:"2px", color:L.textFaint,
+          textTransform:"uppercase", marginBottom:16 }}>9 Chapters</div>
 
-        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+        <div style={{ display:"flex", flexDirection:"column", gap:0 }}>
           {CHAPTERS.map((ch,i)=>{
             const done = completed.includes(ch.id);
             const partnerDone = partnerProgress?.includes(ch.id);
+            const isLast = i === CHAPTERS.length - 1;
+            // Warm terracotta → amber family: #C94040 → #C97840
+            const hues = ["#B34040","#B34E38","#B35E32","#B36E30","#B37E2C","#A07830","#8C7234","#786C38","#64663C"];
+            const accent = hues[i] || "#B34040";
+            const numBg = done ? accent : L.card;
+            const numColor = done ? "#fff" : accent;
+
             return (
-              <div key={ch.id} onClick={()=>onSelect(ch)}
-                style={{ borderRadius:16, cursor:"pointer", overflow:"hidden",
-                  border:`1px solid ${done ? ch.accent+"44" : ch.accent+"18"}`,
-                  background: done ? `${ch.accent}12` : L.card,
-                  animation:`fadeUp ${.4+i*.06}s ease forwards`, opacity:0,
-                  transition:"transform .15s, border-color .2s, box-shadow .2s",
-                  boxShadow: done ? `0 2px 20px ${ch.accent}18` : "none" }}
-                onMouseEnter={e=>{
-                  e.currentTarget.style.transform="translateY(-2px)";
-                  e.currentTarget.style.borderColor=ch.accent+"77";
-                  e.currentTarget.style.boxShadow=`0 8px 24px ${ch.accent}22`;
-                }}
-                onMouseLeave={e=>{
-                  e.currentTarget.style.transform="";
-                  e.currentTarget.style.borderColor=done?ch.accent+"44":ch.accent+"18";
-                  e.currentTarget.style.boxShadow=done?`0 2px 20px ${ch.accent}18`:"none";
-                }}>
-                <div style={{ padding:"16px 20px", display:"flex", alignItems:"center", gap:14 }}>
-                  <div style={{ width:44, height:44, borderRadius:12, flexShrink:0,
-                    background:`${ch.accent}18`, border:`1px solid ${ch.accent}33`,
-                    display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>
-                    {ch.icon}
-                  </div>
-                  <div style={{ flex:1, minWidth:0 }}>
-                    <div style={{ fontSize:14, fontWeight:500, color:L.text }}>{ch.label}</div>
-                    <div style={{ fontSize:11, color:L.textMid, marginTop:2, fontWeight:300 }}>
-                      {ch.tagline}
-                    </div>
-                    {(partnerDone) && (
-                      <div style={{ fontSize:10, color: done ? "#3DBE7A88" : `${C.gold}77`, marginTop:4 }}>
-                        {done ? "✓ Both complete" : "Partner completed"}
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ flexShrink:0 }}>
+              <div key={ch.id} style={{ display:"flex", gap:0,
+                animation:`fadeUp ${.35+i*.05}s ease forwards`, opacity:0 }}>
+                {/* Left: number + connector line */}
+                <div style={{ display:"flex", flexDirection:"column", alignItems:"center",
+                  width:52, flexShrink:0 }}>
+                  <div onClick={()=>onSelect(ch)} style={{ width:36, height:36, borderRadius:"50%",
+                    background:numBg, border:`2px solid ${accent}`,
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                    cursor:"pointer", flexShrink:0, transition:"all .2s",
+                    boxShadow: done ? `0 2px 10px ${accent}44` : "none",
+                    zIndex:1 }}>
                     {done
-                      ? <div style={{ width:26, height:26, borderRadius:"50%",
-                          background:`linear-gradient(135deg, ${ch.accent}, ${ch.accent}AA)`,
-                          display:"flex", alignItems:"center", justifyContent:"center",
-                          boxShadow:`0 2px 8px ${ch.accent}44` }}>
-                          <span style={{ fontSize:12, color:C.navy, fontWeight:700 }}>✓</span>
-                        </div>
-                      : <div style={{ width:26, height:26, borderRadius:"50%",
-                          background:`${ch.accent}18`, border:`1px solid ${ch.accent}33`,
-                          display:"flex", alignItems:"center", justifyContent:"center" }}>
-                          <span style={{ fontSize:12, color:ch.accent }}>›</span>
-                        </div>}
+                      ? <span style={{ fontSize:14, fontWeight:700, color:"#fff" }}>✓</span>
+                      : <span style={{ fontSize:13, fontWeight:700, color:accent }}>{i+1}</span>}
+                  </div>
+                  {!isLast && (
+                    <div style={{ width:2, flex:1, minHeight:20,
+                      background: done ? `linear-gradient(180deg, ${accent}, ${hues[i+1]||accent}88)` : `${accent}22`,
+                      transition:"background .4s" }} />
+                  )}
+                </div>
+
+                {/* Right: card content */}
+                <div onClick={()=>onSelect(ch)}
+                  style={{ flex:1, marginLeft:12, marginBottom: isLast ? 0 : 10,
+                    padding:"14px 16px", borderRadius:14, cursor:"pointer",
+                    background: done ? `${accent}0C` : L.card,
+                    border:`1px solid ${done ? accent+"33" : L.border}`,
+                    transition:"all .18s" }}
+                  onMouseEnter={e=>{
+                    e.currentTarget.style.background=`${accent}12`;
+                    e.currentTarget.style.borderColor=`${accent}55`;
+                    e.currentTarget.style.transform="translateX(3px)";
+                  }}
+                  onMouseLeave={e=>{
+                    e.currentTarget.style.background=done?`${accent}0C`:L.card;
+                    e.currentTarget.style.borderColor=done?`${accent}33`:L.border;
+                    e.currentTarget.style.transform="";
+                  }}>
+                  <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                    <div style={{ flex:1 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:3 }}>
+                        <span style={{ fontSize:15 }}>{ch.icon}</span>
+                        <span style={{ fontSize:14, fontWeight:500,
+                          color: done ? L.textMid : L.text,
+                          textDecoration: done ? "none" : "none" }}>{ch.label}</span>
+                      </div>
+                      <div style={{ fontSize:11, color:L.textFaint, fontWeight:400, paddingLeft:22 }}>
+                        {ch.tagline}
+                        {partnerDone && <span style={{ color:accent, marginLeft:6 }}>
+                          {done ? "· Both done ✓" : "· Partner done"}
+                        </span>}
+                      </div>
+                    </div>
+                    <span style={{ fontSize:13, color: done ? accent : L.textFaint,
+                      fontWeight: done ? 600 : 400, flexShrink:0, marginLeft:8 }}>
+                      {done ? "Done" : "›"}
+                    </span>
                   </div>
                 </div>
-                {done && (
-                  <div style={{ height:2, background:`linear-gradient(90deg, ${ch.accent}66, transparent)` }} />
-                )}
               </div>
             );
           })}
         </div>
 
         {/* Tools section */}
-        <div style={{ fontSize:10, fontWeight:500, letterSpacing:"2px", color:L.textFaint,
-          textTransform:"uppercase", marginTop:28, marginBottom:14 }}>Tools</div>
+        <div style={{ fontSize:10, fontWeight:600, letterSpacing:"2px", color:L.textFaint,
+          textTransform:"uppercase", marginTop:32, marginBottom:14 }}>Tools</div>
 
         <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-          {/* Ask V */}
-          <div onClick={onChat} style={{ borderRadius:16, cursor:"pointer",
-            background:L.goldBg,
-            border:`1px solid ${L.goldBorder}`, transition:"all .2s",
-            boxShadow:`0 2px 16px ${C.gold}0A` }}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor=L.gold; e.currentTarget.style.boxShadow=`0 8px 24px ${L.gold}22`;}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor=L.goldBorder; e.currentTarget.style.boxShadow="";}}>
-            <div style={{ padding:"16px 20px", display:"flex", alignItems:"center", gap:14 }}>
-              <VAvatar size={44} />
-              <div>
-                <div style={{ fontSize:14, fontWeight:500, color:L.gold }}>Ask V anything</div>
-                <div style={{ fontSize:11, color:L.textMid, marginTop:2 }}>Personalized answers for your situation</div>
+          {[
+            { label:"Ask V anything", sub:"Personalized answers for your situation", icon:null, isV:true,
+              onClick:onChat, bg:"#FDF6E3", border:"#C9A84C44", hoverBorder:"#B8860B", color:"#B8860B" },
+            { label:"Tax Calculator", sub:"Joint vs. separate — see your exact savings", icon:"📊",
+              onClick:onOpenTax, bg:"#F0FDF4", border:"#3DBE7A44", hoverBorder:"#16a34a", color:"#16a34a" },
+            { label:"Marriage Checklist", sub:"Your personalized financial to-do list", icon:"✅",
+              onClick:onOpenChecklist, bg:"#FFFBEB", border:"#FCD34D55", hoverBorder:"#D97706", color:"#D97706" },
+            { label:"Money Compatibility", sub:"10 questions. Compare with your partner.", icon:"💑",
+              onClick:onOpenQuiz, bg:"#F5F3FF", border:"#A04CF044", hoverBorder:"#7C3AED", color:"#7C3AED" },
+          ].map((tool,i) => (
+            <div key={i} onClick={tool.onClick}
+              style={{ borderRadius:14, cursor:"pointer", background:tool.bg,
+                border:`1px solid ${tool.border}`, transition:"all .18s",
+                animation:`fadeUp ${.8+i*.06}s ease forwards`, opacity:0 }}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor=tool.hoverBorder; e.currentTarget.style.boxShadow=`0 4px 20px ${tool.hoverBorder}18`;}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor=tool.border; e.currentTarget.style.boxShadow="";}}>
+              <div style={{ padding:"13px 16px", display:"flex", alignItems:"center", gap:12 }}>
+                {tool.isV ? <VAvatar size={36} /> :
+                  <div style={{ width:36, height:36, borderRadius:10, background:"#fff",
+                    border:`1px solid ${tool.border}`, display:"flex",
+                    alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0 }}>
+                    {tool.icon}
+                  </div>}
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:13, fontWeight:500, color:tool.isV?tool.color:L.text }}>{tool.label}</div>
+                  <div style={{ fontSize:11, color:L.textFaint, marginTop:1 }}>{tool.sub}</div>
+                </div>
+                <span style={{ fontSize:12, color:L.textFaint }}>›</span>
               </div>
-              <span style={{ marginLeft:"auto", fontSize:12, color:`${C.gold}55` }}>›</span>
             </div>
-          </div>
-
-          {/* Tax Calculator */}
-          <div onClick={()=>onOpenTax()} style={{ borderRadius:16, cursor:"pointer",
-            background:"#F0FDF4",
-            border:"1px solid #3DBE7A66", transition:"all .2s" }}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor="#3DBE7A66"; e.currentTarget.style.boxShadow="0 8px 24px #3DBE7A18";}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor="#3DBE7A33"; e.currentTarget.style.boxShadow="";}}>
-            <div style={{ padding:"16px 20px", display:"flex", alignItems:"center", gap:14 }}>
-              <div style={{ width:44, height:44, borderRadius:12,
-                background:"#3DBE7A18", border:"1px solid #3DBE7A33",
-                display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>📊</div>
-              <div>
-                <div style={{ fontSize:14, fontWeight:500, color:L.text }}>Tax Calculator</div>
-                <div style={{ fontSize:11, color:L.textMid, marginTop:2 }}>Joint vs. separate — see your exact savings</div>
-              </div>
-              <span style={{ marginLeft:"auto", fontSize:12, color:`${C.cream}33` }}>›</span>
-            </div>
-          </div>
-
-          {/* Checklist */}
-          <div onClick={()=>onOpenChecklist()} style={{ borderRadius:16, cursor:"pointer",
-            background:"#FFFBEB",
-            border:"1px solid #FCD34D66", transition:"all .2s" }}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor="#F59E0B"; e.currentTarget.style.boxShadow="0 8px 24px #F59E0B18";}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor="#FCD34D66"; e.currentTarget.style.boxShadow="";}}>
-            <div style={{ padding:"16px 20px", display:"flex", alignItems:"center", gap:14 }}>
-              <div style={{ width:44, height:44, borderRadius:12,
-                background:"#FEF3C7", border:"1px solid #FCD34D66",
-                display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>✅</div>
-              <div>
-                <div style={{ fontSize:14, fontWeight:500, color:L.text }}>Marriage Checklist</div>
-                <div style={{ fontSize:11, color:L.textMid, marginTop:2 }}>Your personalized financial to-do list</div>
-              </div>
-              <span style={{ marginLeft:"auto", fontSize:12, color:L.textFaint }}>›</span>
-            </div>
-          </div>
-
-          {/* Couples Quiz */}
-          <div onClick={()=>onOpenQuiz()} style={{ borderRadius:16, cursor:"pointer",
-            background:"#F5F3FF",
-            border:"1px solid #A04CF055", transition:"all .2s" }}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor="#7C3AED"; e.currentTarget.style.boxShadow="0 8px 24px #7C3AED18";}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor="#A04CF055"; e.currentTarget.style.boxShadow="";}}>
-            <div style={{ padding:"16px 20px", display:"flex", alignItems:"center", gap:14 }}>
-              <div style={{ width:44, height:44, borderRadius:12,
-                background:"#EDE9FE", border:"1px solid #A04CF055",
-                display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>💑</div>
-              <div>
-                <div style={{ fontSize:14, fontWeight:500, color:L.text }}>Money Compatibility</div>
-                <div style={{ fontSize:11, color:L.textMid, marginTop:2 }}>Compare answers with your partner</div>
-              </div>
-              <span style={{ marginLeft:"auto", fontSize:12, color:L.textFaint }}>›</span>
-            </div>
-          </div>
+          ))}
 
           {/* Partner sync */}
-          <div onClick={()=>setShowPartner(true)} style={{ borderRadius:16, cursor:"pointer",
-            background:"#FAF5FF",
-            border:"1px solid #A04CF055", transition:"all .2s" }}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor="#A04CF066"; e.currentTarget.style.boxShadow="0 8px 24px #A04CF018";}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor="#A04CF033"; e.currentTarget.style.boxShadow="";}}>
-            <div style={{ padding:"16px 20px", display:"flex", alignItems:"center", gap:14 }}>
-              <div style={{ width:44, height:44, borderRadius:12,
-                background:"#A04CF018", border:"1px solid #A04CF033",
-                display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>💍</div>
-              <div>
-                <div style={{ fontSize:14, fontWeight:500, color:L.text }}>
+          <div onClick={()=>setShowPartner(true)} style={{ borderRadius:14, cursor:"pointer",
+            background:L.card, border:`1px solid ${L.border}`, transition:"all .18s",
+            animation:"fadeUp 1.1s ease forwards", opacity:0 }}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor="#A04CF066"; e.currentTarget.style.boxShadow="0 4px 20px #A04CF018";}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor=L.border; e.currentTarget.style.boxShadow="";}}>
+            <div style={{ padding:"13px 16px", display:"flex", alignItems:"center", gap:12 }}>
+              <div style={{ width:36, height:36, borderRadius:10, background:"#F5F3FF",
+                border:"1px solid #A04CF044", display:"flex",
+                alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0 }}>💍</div>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:13, fontWeight:500, color:L.text }}>
                   {partnerProgress ? "Partner linked ✓" : "Invite your partner"}
                 </div>
                 <div style={{ fontSize:11, color:`${C.cream}44`, marginTop:2 }}>
