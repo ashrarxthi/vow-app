@@ -1,4 +1,6 @@
 import TaxCalculator from './TaxCalculator.jsx'
+import Checklist from './Checklist.jsx'
+import CouplesQuiz from './CouplesQuiz.jsx'
 /**
  * VOW — Full Supabase Edition
  *
@@ -878,7 +880,7 @@ function ProfileModal({ profile, userId, onSave, onClose }) {
 }
 
 // ─── Chapter Map ──────────────────────────────────────────────────────────────
-function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, onSignOut, onProfileUpdate }) {
+function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, onOpenChecklist, onOpenQuiz, onSignOut, onProfileUpdate }) {
   const [showPartner, setShowPartner] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [partnerProgress, setPartnerProgress] = useState(null);
@@ -1083,6 +1085,42 @@ function ChapterMap({ profile, completed, userId, onSelect, onChat, onOpenTax, o
                 <div style={{ fontSize:11, color:L.textMid, marginTop:2 }}>Joint vs. separate — see your exact savings</div>
               </div>
               <span style={{ marginLeft:"auto", fontSize:12, color:`${C.cream}33` }}>›</span>
+            </div>
+          </div>
+
+          {/* Checklist */}
+          <div onClick={()=>onOpenChecklist()} style={{ borderRadius:16, cursor:"pointer",
+            background:"#FFFBEB",
+            border:"1px solid #FCD34D66", transition:"all .2s" }}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor="#F59E0B"; e.currentTarget.style.boxShadow="0 8px 24px #F59E0B18";}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor="#FCD34D66"; e.currentTarget.style.boxShadow="";}}>
+            <div style={{ padding:"16px 20px", display:"flex", alignItems:"center", gap:14 }}>
+              <div style={{ width:44, height:44, borderRadius:12,
+                background:"#FEF3C7", border:"1px solid #FCD34D66",
+                display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>✅</div>
+              <div>
+                <div style={{ fontSize:14, fontWeight:500, color:L.text }}>Marriage Checklist</div>
+                <div style={{ fontSize:11, color:L.textMid, marginTop:2 }}>Your personalized financial to-do list</div>
+              </div>
+              <span style={{ marginLeft:"auto", fontSize:12, color:L.textFaint }}>›</span>
+            </div>
+          </div>
+
+          {/* Couples Quiz */}
+          <div onClick={()=>onOpenQuiz()} style={{ borderRadius:16, cursor:"pointer",
+            background:"#F5F3FF",
+            border:"1px solid #A04CF055", transition:"all .2s" }}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor="#7C3AED"; e.currentTarget.style.boxShadow="0 8px 24px #7C3AED18";}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor="#A04CF055"; e.currentTarget.style.boxShadow="";}}>
+            <div style={{ padding:"16px 20px", display:"flex", alignItems:"center", gap:14 }}>
+              <div style={{ width:44, height:44, borderRadius:12,
+                background:"#EDE9FE", border:"1px solid #A04CF055",
+                display:"flex", alignItems:"center", justifyContent:"center", fontSize:22 }}>💑</div>
+              <div>
+                <div style={{ fontSize:14, fontWeight:500, color:L.text }}>Money Compatibility</div>
+                <div style={{ fontSize:11, color:L.textMid, marginTop:2 }}>Compare answers with your partner</div>
+              </div>
+              <span style={{ marginLeft:"auto", fontSize:12, color:L.textFaint }}>›</span>
             </div>
           </div>
 
@@ -1468,11 +1506,13 @@ export default function VowApp() {
       {screen==="onboarding"  && <Onboarding onComplete={handleProfileComplete} />}
       {screen==="map"         && <ChapterMap profile={profile} completed={completed} userId={user?.id}
                                    onSelect={ch=>{ setActiveChapter(ch); setScreen("lesson"); }}
-                                   onChat={()=>setScreen("chat")} onOpenTax={()=>setScreen("tax")} onSignOut={handleSignOut} onProfileUpdate={(p)=>setProfile(p)} />}
+                                   onChat={()=>setScreen("chat")} onOpenTax={()=>setScreen("tax")} onOpenChecklist={()=>setScreen("checklist")} onOpenQuiz={()=>setScreen("quiz")} onSignOut={handleSignOut} onProfileUpdate={(p)=>setProfile(p)} />}
       {screen==="lesson"      && activeChapter && <LessonScreen chapter={activeChapter} profile={profile}
                                    onComplete={handleChapterComplete} onBack={()=>setScreen("map")} />}
       {screen==="chat"        && <ChatScreen profile={profile} userId={user?.id} onBack={()=>setScreen("map")} />}
       {screen==="tax"         && <TaxCalculator onBack={()=>setScreen("map")} />}
+      {screen==="checklist"  && <Checklist profile={profile} userId={user?.id} onBack={()=>setScreen("map")} />}
+      {screen==="quiz"        && <CouplesQuiz userId={user?.id} onBack={()=>setScreen("map")} />}
     </>
   );
 }
